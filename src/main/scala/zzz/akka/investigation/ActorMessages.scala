@@ -14,7 +14,7 @@ class MyActor extends Actor {
     case 42 =>
       println("I don't know the question. Go ask Eath Mark II.")
     case s: String =>
-      println("You sent me a string: " + s)
+      println("You sent me the string: \"" + s + "\"" )
     case Alpha(Beta(beta1, Gamma(gamma1)), Beta(beta2, Gamma(gamma2))) =>
       println(s"beta1: %s, beta2: %s, gamma1: %s, gamma2: %s".format(beta1, beta2, gamma1, gamma2))
     case _ => 
@@ -33,6 +33,7 @@ object ActorMessages {
 	  actor ! 42
 	  actor ! Alpha(Beta("beta1", Gamma("gamma1")), Beta("beta2", Gamma("gamma2")))
 	  actor ! 456.5F
+	  actor tell """This is a message sent using the "tell" method """
 	  
 	  system.shutdown()
   }
