@@ -7,14 +7,15 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object Altimeter {
-  // This message is sent to the Altimeter to inform about the rate of climb
-  case class RateChange(amount: Float)
-
   val MinAmount = -1.0F
   val MaxAmount = 1.0F
+
+  // This message is sent to the Altimeter to inform about the rate of climb
+  case class RateChange(amount: Float)
+  case class AltitudeUpdate(altitude: Double)
 }
 
-class Altimeter extends Actor with ActorLogging {
+class Altimeter extends Actor with ActorLogging  with EventSource{
 
   import Altimeter._
 
@@ -29,8 +30,10 @@ class Altimeter extends Actor with ActorLogging {
 
   val ticker = context.system.scheduler.schedule(100.millis, 100.millis, self, Tick)
   case object Tick
+  
+  override def receive = eventSourceReceive orElse altimeterReceive
 
-  override def receive = {
+  def altimeterReceive: Receive = {
     case RateChange(amount) =>
       rateOfClimb = keepTheValueWithin(MinAmount, MaxAmount, amount) * maxRateOfClimb
       log.info(s"Altimeter changed rate of climb to $rateOfClimb.")
@@ -41,6 +44,7 @@ class Altimeter extends Actor with ActorLogging {
       altitude = altitude + ((tick - lastTick) / 60000.0) * rateOfClimb
       log.info(s"Changed current altitude to $altitude")
       lastTick = tick
+      sendEvent(AltitudeUpdate(altitude))
     case msg =>
       throw new RuntimeException("Unknown message received: " + msg);
 
