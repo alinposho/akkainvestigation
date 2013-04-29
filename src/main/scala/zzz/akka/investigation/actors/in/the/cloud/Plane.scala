@@ -17,7 +17,7 @@ class Plane extends Actor with ActorLogging {
   
   def receive = {
     case GiveMeControl =>
-      log.info("Plane gicing control to " + sender)
+      log.info("Plane giving control to " + sender)
       sender ! controls // Notice that it's perfectly legal to send a reference
       					// in the response message
   }

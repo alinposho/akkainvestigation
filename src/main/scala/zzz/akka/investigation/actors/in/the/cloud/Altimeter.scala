@@ -9,11 +9,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object Altimeter {
   // This message is sent to the Altimeter to inform about the rate of climb
   case class RateChange(amount: Float)
+
+  val MinAmount = -1.0F
+  val MaxAmount = 1.0F
 }
 
 class Altimeter extends Actor with ActorLogging {
 
-  import Altimeter.RateChange
+  import Altimeter._
 
   val maxCeilingInFeet = 43000
   // In "feet per minute"
@@ -29,14 +32,14 @@ class Altimeter extends Actor with ActorLogging {
 
   override def receive = {
     case RateChange(amount) =>
-      rateOfClimb = keepTheValueWithin(1.0f, -1.0f, amount) // Is this correct? It doesn't sound right! 
+      rateOfClimb = keepTheValueWithin(MinAmount, MaxAmount, amount) * maxRateOfClimb
       log.info(s"Altimeter changed rate of climb to $rateOfClimb.")
 
     // Calculate a new altitude
     case Tick =>
       val tick = System.currentTimeMillis
       altitude = altitude + ((tick - lastTick) / 60000.0) * rateOfClimb
-      log.info(s"Chnaged current altitude to $altitude")
+      log.info(s"Changed current altitude to $altitude")
       lastTick = tick
     case msg =>
       throw new RuntimeException("Unknown message received: " + msg);
@@ -44,7 +47,7 @@ class Altimeter extends Actor with ActorLogging {
   }
 
   private def keepTheValueWithin(min: Float, max: Float, amount: Float) = {
-    amount.min(min).max(max) * maxRateOfClimb
+    amount.min(min).max(max)
   }
 
   // Kill our ticker when we stop
