@@ -15,7 +15,7 @@ object Altimeter {
   case class AltitudeUpdate(altitude: Double)
 }
 
-class Altimeter extends Actor with ActorLogging  with EventSource{
+class Altimeter extends Actor with ActorLogging with EventSource {
 
   import Altimeter._
 
@@ -30,7 +30,7 @@ class Altimeter extends Actor with ActorLogging  with EventSource{
 
   val ticker = context.system.scheduler.schedule(100.millis, 100.millis, self, Tick)
   case object Tick
-  
+
   override def receive = eventSourceReceive orElse altimeterReceive
 
   def altimeterReceive: Receive = {
@@ -40,11 +40,11 @@ class Altimeter extends Actor with ActorLogging  with EventSource{
 
     // Calculate a new altitude
     case Tick =>
-      val tick = System.currentTimeMillis
-      altitude = altitude + ((tick - lastTick) / 60000.0) * rateOfClimb
-      log.info(s"Changed current altitude to $altitude")
-      lastTick = tick
+      calculateNewAltitude()
       sendEvent(AltitudeUpdate(altitude))
+    // Not needed any longer since the Plane is logging the same info
+    // when listening for the AltitudeUpdate event.
+    //      log.info(s"Changed current altitude to $altitude") 
     case msg =>
       throw new RuntimeException("Unknown message received: " + msg);
 
@@ -54,7 +54,14 @@ class Altimeter extends Actor with ActorLogging  with EventSource{
     amount.min(max).max(min)
   }
 
+  private def calculateNewAltitude(): Unit = {
+    val tick = System.currentTimeMillis
+    altitude = altitude + ((tick - lastTick) / 60000.0) * rateOfClimb
+    lastTick = tick
+  }
+
   // Kill our ticker when we stop
   override def postStop(): Unit = ticker.cancel
+
 }
 
