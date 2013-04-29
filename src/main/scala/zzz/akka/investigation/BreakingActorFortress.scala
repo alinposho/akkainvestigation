@@ -1,14 +1,12 @@
-package zzz.akka.investigation.actors.in.the.cloud
-
-import akka.actor.{ Actor, ActorRef }
+package zzz.akka.investigation
+import akka.actor.Actor
 import scala.concurrent.duration._
 import akka.actor.ActorLogging
 import scala.concurrent.ExecutionContext.Implicits.global
 import akka.actor.ActorSystem
 import akka.actor.Props
-import scala.concurrent.Await
 import akka.util.Timeout
-import akka.pattern.ask// Needed for "?"
+import akka.actor.actorRef2Scala
 
 case class SomeMessage(msg: String)
 case class DelayedResponse(msg: String)
