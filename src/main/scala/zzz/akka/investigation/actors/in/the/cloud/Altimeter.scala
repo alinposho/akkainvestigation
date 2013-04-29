@@ -47,7 +47,7 @@ class Altimeter extends Actor with ActorLogging {
   }
 
   private def keepTheValueWithin(min: Float, max: Float, amount: Float) = {
-    amount.min(min).max(max)
+    amount.min(max).max(min)
   }
 
   // Kill our ticker when we stop
