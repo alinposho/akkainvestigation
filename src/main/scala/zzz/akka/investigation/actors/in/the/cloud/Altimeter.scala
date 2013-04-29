@@ -37,17 +37,11 @@ class Altimeter extends Actor with ActorLogging with EventSource {
     case RateChange(amount) =>
       rateOfClimb = keepTheValueWithin(MinAmount, MaxAmount, amount) * maxRateOfClimb
       log.info(s"Altimeter changed rate of climb to $rateOfClimb.")
-
-    // Calculate a new altitude
     case Tick =>
       calculateNewAltitude()
       sendEvent(AltitudeUpdate(altitude))
-    // Not needed any longer since the Plane is logging the same info
-    // when listening for the AltitudeUpdate event.
-    //      log.info(s"Changed current altitude to $altitude") 
     case msg =>
       throw new RuntimeException("Unknown message received: " + msg);
-
   }
 
   private def keepTheValueWithin(min: Float, max: Float, amount: Float) = {
