@@ -14,7 +14,7 @@ object Avionics {
   val system = ActorSystem("PlaneSymulation")
   val plane = system.actorOf(Props[Plane])
 
-  // Remember the construct used to wait for an Actor's reponse  
+  // Remember the construct used to wait for an Actor's response  
   val control = Await.result((plane ? Plane.GiveMeControl).mapTo[ActorRef], 5 seconds)
 
   def main(args: Array[String]) {

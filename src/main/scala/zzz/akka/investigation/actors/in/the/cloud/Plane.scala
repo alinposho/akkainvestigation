@@ -13,7 +13,9 @@ class Plane extends Actor with ActorLogging {
   import Plane._
   import EventSource.RegisterListener
   
-  val altimeter = context.actorOf(Props[Altimeter])
+  // Need to call the companion object constructor for Altimeter otherwise, an exception will be raised since
+  // the class doesn't define the "eventSourceReceive" method 
+  val altimeter = context.actorOf(Props(Altimeter())) 
   val controls = context.actorOf(Props(new ControlSurfaces(altimeter)))
 
   override def preStart() {

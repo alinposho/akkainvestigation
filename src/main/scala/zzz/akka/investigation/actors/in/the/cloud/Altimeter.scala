@@ -13,9 +13,11 @@ object Altimeter {
   // This message is sent to the Altimeter to inform about the rate of climb
   case class RateChange(amount: Float)
   case class AltitudeUpdate(altitude: Double)
+  
+  def apply() = new Altimeter with ProductionEventSource
 }
 
-class Altimeter extends Actor with ActorLogging with EventSource {
+class Altimeter extends Actor with ActorLogging { this: EventSource =>
 
   import Altimeter._
 
