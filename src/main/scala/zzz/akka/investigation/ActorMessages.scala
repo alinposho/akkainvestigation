@@ -34,6 +34,7 @@ object ActorMessages {
 	  actor ! Alpha(Beta("beta1", Gamma("gamma1")), Beta("beta2", Gamma("gamma2")))
 	  actor ! 456.5F
 	  actor tell """This is a message sent using the "tell" method """
+	  actor tell ("""This is a message sent using the "tell(msg, null)" method """, null)
 	  
 	  system.shutdown()
   }
