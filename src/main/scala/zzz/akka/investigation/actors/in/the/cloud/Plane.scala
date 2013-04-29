@@ -11,14 +11,21 @@ class Plane extends Actor with ActorLogging {
 
   import Altimeter._
   import Plane._
+  import EventSource.RegisterListener
   
   val altimeter = context.actorOf(Props[Altimeter])
   val controls = context.actorOf(Props(new ControlSurfaces(altimeter)))
+
+  override def preStart() {
+    altimeter ! RegisterListener(self)
+  }
   
   def receive = {
     case GiveMeControl =>
       log.info("Plane giving control to " + sender)
       sender ! controls // Notice that it's perfectly legal to send a reference
       					// in the response message
+    case AltitudeUpdate(altitude) =>
+      log.info(s"Altitude is now: $altitude")
   }
 }
