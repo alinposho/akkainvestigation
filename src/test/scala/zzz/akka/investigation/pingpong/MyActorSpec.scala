@@ -9,13 +9,15 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.ParallelTestExecution
 import akka.actor.ActorRef
 import akka.actor.Props
+import akka.testkit.ImplicitSender
 
 class MyActorSpec extends TestKit(ActorSystem("MyActorSpec"))
   with WordSpec
   with MustMatchers
   with BeforeAndAfterAll
-  with ParallelTestExecution {
-  
+  with ParallelTestExecution
+  with ImplicitSender {
+
   import MyActor._
 
   override def afterAll() { system.shutdown() }
