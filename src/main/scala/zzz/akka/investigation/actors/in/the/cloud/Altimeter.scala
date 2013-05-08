@@ -14,7 +14,9 @@ object Altimeter {
   case class RateChange(amount: Float)
   case class AltitudeUpdate(altitude: Double)
   
-  def apply() = new Altimeter with ProductionEventSource
+  class AltemeterWithEventSource extends Altimeter with ProductionEventSource
+  def apply(): Props = Props[AltemeterWithEventSource]
+  
 }
 
 class Altimeter extends Actor with ActorLogging { this: EventSource =>
