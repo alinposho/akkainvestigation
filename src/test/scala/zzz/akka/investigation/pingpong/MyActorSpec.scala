@@ -37,8 +37,9 @@ class MyActorSpec extends TestKit(ActorSystem("MyActorSpec"))
 
     "respond with a Pong to a Ping" in {
       val a = makeActor()
-      a ! Ping
-      expectMsg(Pong)
+      val msg = "My message"
+      a ! Ping(msg)
+      expectMsg(Pong(msg))
     }
   }
 
