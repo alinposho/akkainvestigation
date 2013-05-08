@@ -11,12 +11,15 @@ import akka.actor.ActorRef
 import akka.actor.Props
 import akka.testkit.ImplicitSender
 
+// For some unknown reason and unlike in the book, this class works, despite the 
+// fact that it's run in parallel. I might need to provide a Distributor instance
+// to the runTests method, but I have no idea how to do that.
 class MyActorSpec extends TestKit(ActorSystem("MyActorSpec"))
-  with WordSpec
-  with MustMatchers
-  with BeforeAndAfterAll
-  with ParallelTestExecution
-  with ImplicitSender {
+  							with WordSpec
+  							with MustMatchers
+  							with BeforeAndAfterAll
+  							with ParallelTestExecution
+  							with ImplicitSender {
 
   import MyActor._
 
