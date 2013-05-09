@@ -10,7 +10,8 @@ import org.scalatest.BeforeAndAfterAll
 import akka.actor.Actor
 import akka.testkit.TestActorRef
 import akka.actor.Props
-
+import java.util.concurrent.TimeUnit
+import zzz.akka.investigation.actors.in.the.cloud.EventSource.RegisterListener
 
 object EventSourceSpy {
   val latch = new CountDownLatch(1)
@@ -24,36 +25,58 @@ trait EventSourceSpy extends EventSource {
   }
 }
 
-class AltimeterSpec extends TestKit(ActorSystem("AltemeterSpec")) 
-						with ImplicitSender
-						with WordSpec
-						with MustMatchers 
-						with BeforeAndAfterAll {
-  
+class AltimeterSpec extends TestKit(ActorSystem("AltemeterSpec"))
+  with ImplicitSender
+  with WordSpec
+  with MustMatchers
+  with BeforeAndAfterAll {
+
   import Altimeter._
-  
+
   val MaxRateOfClimbChange = 1f
-  
+  val AboveMaxRateOfClimbChange = 2f
+
   override def afterAll(): Unit = system.shutdown()
-  
+
   class SlicedAltimenter extends Altimeter with EventSourceSpy
-  
+
   def actor() = {
-    TestActorRef[Altimeter](Props[SlicedAltimenter])
-  }   
-  
+    //    TestActorRef[Altimeter](Props[SlicedAltimenter]) // This raises an exception
+    TestActorRef[Altimeter](Props(new SlicedAltimenter()))
+  }
+
   "Altimeter" should {
+
+    "record rate of climb changes" in {
+      val real = actor().underlyingActor
+      real.receive(RateChange(MaxRateOfClimbChange))
+      real.rateOfClimb must be(real.maxRateOfClimb)
+    }
+
+    "keep rate of climb changes within bounds" in {
+      val real = actor().underlyingActor
+      real.receive(RateChange(AboveMaxRateOfClimbChange))
+      real.rateOfClimb must be(real.maxRateOfClimb)
+    }
+
+    "calculate rate changes" in {
+      val realRef = system.actorOf(Altimeter())
+      realRef ! RegisterListener(testActor)
+      
+      realRef ! RateChange(MaxRateOfClimbChange)
+      
+      fishForMessage(){
+        case AltitudeUpdate(altitude) if(altitude == 0f) => false
+        case AltitudeUpdate(altitude) => true
+      }
+    }
     
-	  "record rate of climb changes" in {
-	    val real = actor().underlyingActor
-	    
-	    real.receive(RateChange(MaxRateOfClimbChange))
-	    
-	    real.rateOfClimb must be (real.maxRateOfClimb)
-	  }
-    
+    "send events" in {
+      val ref = actor()
+      EventSourceSpy.latch.await(1, TimeUnit.SECONDS) must be (true)
+    }
     
   }
-  
+
 }
 
