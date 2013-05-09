@@ -20,6 +20,6 @@ class AnnoyingActor(snooper: ActorRef) extends Actor {
 class NiceActor(snooper: ActorRef) extends Actor {
   def receive = {
     case 'send => 
-      snooper ! "Hi"
+      snooper ! "Hi!"
   } 
 }
