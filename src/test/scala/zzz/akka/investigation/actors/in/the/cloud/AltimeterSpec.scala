@@ -62,21 +62,24 @@ class AltimeterSpec extends TestKit(ActorSystem("AltemeterSpec"))
     "calculate rate changes" in {
       val realRef = system.actorOf(Altimeter())
       realRef ! RegisterListener(testActor)
-      
+
       realRef ! RateChange(MaxRateOfClimbChange)
-      
-      fishForMessage(){
-        case AltitudeUpdate(altitude) if(altitude == 0f) => false
+
+      fishForMessage() {
+        case AltitudeUpdate(altitude) if (altitude == 0f) => false
         case AltitudeUpdate(altitude) => true
       }
     }
-    
+
     "send events" in {
       val ref = actor()
-      EventSourceSpy.latch.await(1, TimeUnit.SECONDS) must be (true)
+      assertEventsAreSent()
     }
-    
+
   }
 
+  def assertEventsAreSent() {
+    EventSourceSpy.latch.await(1, TimeUnit.SECONDS) must be(true)
+  }
 }
 
