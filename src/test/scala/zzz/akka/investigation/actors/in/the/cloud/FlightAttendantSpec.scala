@@ -7,6 +7,7 @@ import org.scalatest.WordSpec
 import akka.testkit.ImplicitSender
 import org.scalatest.matchers.MustMatchers
 import org.scalatest.BeforeAndAfterAll
+import com.typesafe.config.ConfigFactory
 
 object TestFlightAttendant {
   
@@ -18,7 +19,8 @@ object TestFlightAttendant {
   def apply(): Props = Props[TestFlightAttendant]
 }
 
-class FlightAttendantSpec extends TestKit(ActorSystem("FlightAttendantTestSystem"))
+class FlightAttendantSpec extends TestKit(ActorSystem("FlightAttendantTestSystem",
+    ConfigFactory.parseString("akka.scheduler.tick-duration = 1ms")))
 							with WordSpec
 							with ImplicitSender
 							with MustMatchers 
