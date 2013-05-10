@@ -12,6 +12,8 @@ import akka.testkit.TestActorRef
 import akka.actor.Props
 import java.util.concurrent.TimeUnit
 import zzz.akka.investigation.actors.in.the.cloud.EventSource.RegisterListener
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
 object EventSourceSpy {
   val latch = new CountDownLatch(1)
@@ -25,6 +27,7 @@ trait EventSourceSpy extends EventSource {
   }
 }
 
+@RunWith(classOf[JUnitRunner])
 class AltimeterSpec extends TestKit(ActorSystem("AltemeterSpec"))
   with ImplicitSender
   with WordSpec

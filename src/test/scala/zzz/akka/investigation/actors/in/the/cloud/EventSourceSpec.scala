@@ -4,11 +4,14 @@ import akka.actor.{ Actor, ActorSystem, Props }
 import akka.testkit.{ TestKit, TestActorRef, ImplicitSender }
 import org.scalatest.{ WordSpec, BeforeAndAfterAll }
 import org.scalatest.matchers.MustMatchers
+import org.scalatest.junit.JUnitRunner
+import org.junit.runner.RunWith
 
 class TestEventSource extends Actor with ProductionEventSource {
   def receive = eventSourceReceive
 }
 
+@RunWith(classOf[JUnitRunner])
 class EventSourceSpec extends TestKit(ActorSystem("EventSourceSpec"))
   with WordSpec
   with MustMatchers

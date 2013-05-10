@@ -1,13 +1,17 @@
 package zzz.akka.investigation.test.probe
 
-import akka.testkit.TestKit
-import akka.actor.ActorSystem
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
-import org.scalatest.BeforeAndAfterAll
+import akka.actor.ActorSystem
 import akka.actor.Props
+import akka.actor.actorRef2Scala
+import akka.testkit.TestKit
 import akka.testkit.TestProbe
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class TestProbeSpec extends TestKit(ActorSystem("TestProbeActor"))
 							with WordSpec 
 							with MustMatchers 
