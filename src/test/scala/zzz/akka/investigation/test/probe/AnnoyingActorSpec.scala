@@ -11,6 +11,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
+@Ignore("One of the tests from this suite is expected to fail. See comments bellow")
 class AnnoyingActorSpec extends TestKit(ActorSystem("AnnoyingActor"))
 							with WordSpec 
 							with MustMatchers 
@@ -30,15 +31,15 @@ class AnnoyingActorSpec extends TestKit(ActorSystem("AnnoyingActor"))
   // from the previous test is not going to stop instantaneously, consequently
   // it will continue to send "Hello!!!" messages to the testActor even during this
   // test
-//  "The NiceActor" should {
-//    "say Hi!" in {
-//      val nice = system.actorOf(Props(classOf[NiceActor], testActor))
-//      
-//      nice ! 'send
-//      
-//      expectMsg("Hi!")
-//      system.stop(nice)
-//    }
-//  }
+  "The NiceActor" should {
+    "say Hi!" in {
+      val nice = system.actorOf(Props(classOf[NiceActor], testActor))
+      
+      nice ! 'send
+      
+      expectMsg("Hi!")
+      system.stop(nice)
+    }
+  }
 
 }
