@@ -9,6 +9,8 @@ import zzz.akka.investigation.actors.in.the.cloud.pilot.AutoPilot
 
 object Plane {
   case object GiveMeControl
+  
+  val Name = "Plane"
 }
 
 class Plane extends Actor with ActorLogging {
@@ -19,8 +21,8 @@ class Plane extends Actor with ActorLogging {
 
   // Need to call the companion object constructor for Altimeter otherwise, an exception will be raised since
   // the class doesn't define the "eventSourceReceive" method 
-  val altimeter = context.actorOf(Altimeter())
-  val controls = context.actorOf(Props(classOf[ControlSurfaces], altimeter))
+  val altimeter = context.actorOf(Altimeter(), Altimeter.Name)
+  val controls = context.actorOf(Props(classOf[ControlSurfaces], altimeter), ControlSurfaces.Name)
   val config = context.system.settings.config
   val pilot = context.actorOf(Props[Pilot], config.getString("zzz.akka.avionics.flightcrew.pilotName"))
   val copilot = context.actorOf(Props[CoPilot], config.getString("zzz.akka.avionics.flightcrew.copilotName"))

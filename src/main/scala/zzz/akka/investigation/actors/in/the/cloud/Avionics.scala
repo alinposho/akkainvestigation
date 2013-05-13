@@ -12,7 +12,7 @@ object Avionics {
   // Needed for '?' bellow
   implicit val timeout = Timeout(5.seconds)
   val system = ActorSystem("PlaneSymulation")
-  val plane = system.actorOf(Props[Plane])
+  val plane = system.actorOf(Props[Plane], Plane.Name)
 
   // Remember the construct used to wait for an Actor's response  
   val control = Await.result((plane ? Plane.GiveMeControl).mapTo[ActorRef], 5 seconds)

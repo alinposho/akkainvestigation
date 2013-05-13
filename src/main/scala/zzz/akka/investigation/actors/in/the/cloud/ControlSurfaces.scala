@@ -8,6 +8,8 @@ import akka.actor.{Actor, ActorRef}
 object ControlSurfaces {
   case class StickBack(amount: Float)
   case class StickForward(amount: Float)
+  
+  val Name = "ControlSurfaces"
 }
 
 // Pass in the Altimeter as an ActorRef so that we can send messages to it.

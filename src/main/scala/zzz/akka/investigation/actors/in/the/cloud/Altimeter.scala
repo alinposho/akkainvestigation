@@ -9,6 +9,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object Altimeter {
   val MinAmount = -1.0F
   val MaxAmount = 1.0F
+  
+  val Name = "Altimeter"
 
   // This message is sent to the Altimeter to inform about the rate of climb
   case class RateChange(amount: Float)
