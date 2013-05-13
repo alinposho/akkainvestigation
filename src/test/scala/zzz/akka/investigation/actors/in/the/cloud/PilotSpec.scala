@@ -1,0 +1,91 @@
+package zzz.akka.investigation.actors.in.the.cloud
+
+import org.junit.runner.RunWith
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.WordSpec
+import org.scalatest.matchers.MustMatchers
+import akka.actor.Actor
+import akka.actor.ActorSystem
+import akka.actor.Props
+import akka.testkit.TestKit
+import org.scalatest.junit.JUnitRunner
+import akka.testkit.TestActorRef
+import org.scalatest.BeforeAndAfterEach
+
+// There has to be some better way of doing this
+case class DummyCopilot extends Actor {
+  def receive = {
+    case _ =>
+  }
+}
+// There has to be some better way of doing this
+case class DummyAutopilot extends Actor {
+  def receive = {
+    case _ =>
+  }
+}
+
+// There has to be some better way of doing this
+class TestPilotParent extends Actor {
+  
+  def pilot = Props[Pilot]
+  
+  def receive = {
+    case _ => 
+  }
+}
+
+@RunWith(classOf[JUnitRunner])
+class PilotSpec extends TestKit(ActorSystem("PilotSpecActorSystem"))
+  with WordSpec
+  with MustMatchers
+  with BeforeAndAfterAll
+  with BeforeAndAfterEach {
+
+  import Pilots._
+  import Plane._
+
+  private var pilot: TestActorRef[Pilot] = null
+
+  override def beforeEach() {
+    pilot = TestActorRef[Pilot]
+  }
+
+  override def afterAll = system.shutdown()
+
+  "Pilot" should {
+
+    "ask its parent Actor for the controls when ReadyToGo" in {
+            
+      pilot ! ReadyToGo
+      
+      expectMsg(GiveMeControl)
+    }
+
+    "get a reference to its Copilot when ReadyToGo" in {
+      val copilot = createCopilot()
+
+      pilot ! ReadyToGo
+
+      assert(pilot.underlyingActor.copilot === copilot)
+    }
+
+    "get a reference to its Autopilot when ReadyToGo" in {
+      val autopilot = createAutopilot()
+
+      pilot ! ReadyToGo
+
+      assert(pilot.underlyingActor.autopilot === autopilot)
+    }
+
+  }
+
+  private def createCopilot() = {
+    system.actorOf(Props[DummyCopilot], pilot.underlyingActor.copilotName)
+  }
+
+  private def createAutopilot() = {
+    system.actorOf(Props[DummyAutopilot], pilot.underlyingActor.AutopilotName)
+  }
+
+}
