@@ -28,10 +28,11 @@ case class DummyAutopilot extends Actor {
 // There has to be some better way of doing this
 class TestPilotParent extends Actor {
   
-  def pilot = Props[Pilot]
+  def pilot = context.actorOf(Props[Pilot])
   
   def receive = {
-    case _ => 
+    case msg =>
+      throw new Exception(s"We received message $msg when we didn't expect it.")
   }
 }
 
@@ -56,25 +57,20 @@ class PilotSpec extends TestKit(ActorSystem("PilotSpecActorSystem"))
   "Pilot" should {
 
     "ask its parent Actor for the controls when ReadyToGo" in {
-            
+      pilot.underlyingActor.parent = testActor
       pilot ! ReadyToGo
-      
       expectMsg(GiveMeControl)
     }
 
     "get a reference to its Copilot when ReadyToGo" in {
       val copilot = createCopilot()
-
       pilot ! ReadyToGo
-
       assert(pilot.underlyingActor.copilot === copilot)
     }
 
     "get a reference to its Autopilot when ReadyToGo" in {
       val autopilot = createAutopilot()
-
       pilot ! ReadyToGo
-
       assert(pilot.underlyingActor.autopilot === autopilot)
     }
 
