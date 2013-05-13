@@ -7,6 +7,8 @@ import zzz.akka.investigation.actors.in.the.cloud.Plane
 object Pilots {
   case object ReadyToGo
   case object RelinquishControl
+  
+  val AutoPilotName = "AutoPilot"
 }
 
 class Pilot extends Actor {
@@ -18,21 +20,20 @@ class Pilot extends Actor {
   var copilot: ActorRef = context.system.deadLetters
   var autopilot: ActorRef = context.system.deadLetters
   var parent: ActorRef = context.system.deadLetters
-
-  val copilotName = context.system.settings.config.getString("zzz.akka.avionics.flightcrew.copilotName")
-  val AutopilotName = "Autopilot"
   
+  val copilotName = context.system.settings.config.getString("zzz.akka.avionics.flightcrew.copilotName")
+
   override def preStart() {
     parent = context.parent
-  }  
-    
+  }
+
   def receive = {
-    case ReadyToGo => 
+    case ReadyToGo =>
       parent ! GiveMeControl
       copilot = context.actorFor("../" + copilotName)
-      autopilot = context.actorFor("../" + AutopilotName)
-    case controlSurfaces: ActorRef => 
-      controls = controlSurfaces       
-  } 
+      autopilot = context.actorFor("../" + AutoPilotName)
+    case controlSurfaces: ActorRef =>
+      controls = controlSurfaces
+  }
 
 }

@@ -14,7 +14,7 @@ class CoPilot extends Actor {
   def receive = {
     case ReadyToGo =>
       pilot = context.actorFor("../" + pilotName)
-      autopilot = context.actorFor("../AutoPilot")
+      autopilot = context.actorFor("../" + AutoPilotName)
   }
 
 }

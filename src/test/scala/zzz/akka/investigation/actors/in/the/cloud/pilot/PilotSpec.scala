@@ -82,7 +82,7 @@ class PilotSpec extends TestKit(ActorSystem("PilotSpecActorSystem"))
   }
 
   private def createAutopilot() = {
-    system.actorOf(Props[DummyAutopilot], pilot.underlyingActor.AutopilotName)
+    system.actorOf(Props[DummyAutopilot], AutoPilotName)
   }
 
 }
