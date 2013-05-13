@@ -1,7 +1,8 @@
-package zzz.akka.investigation.actors.in.the.cloud
+package zzz.akka.investigation.actors.in.the.cloud.pilot
 
 import akka.actor.Actor
 import akka.actor.ActorRef
+import zzz.akka.investigation.actors.in.the.cloud.Plane
 
 object Pilots {
   case object ReadyToGo

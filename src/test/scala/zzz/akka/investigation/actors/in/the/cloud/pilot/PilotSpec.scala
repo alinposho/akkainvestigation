@@ -1,4 +1,4 @@
-package zzz.akka.investigation.actors.in.the.cloud
+package zzz.akka.investigation.actors.in.the.cloud.pilot
 
 import org.junit.runner.RunWith
 import org.scalatest.BeforeAndAfterAll
@@ -8,9 +8,10 @@ import akka.actor.Actor
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.testkit.TestKit
-import org.scalatest.junit.JUnitRunner
 import akka.testkit.TestActorRef
 import org.scalatest.BeforeAndAfterEach
+import zzz.akka.investigation.actors.in.the.cloud.Plane
+import org.scalatest.junit.JUnitRunner
 
 // There has to be some better way of doing this
 case class DummyCopilot extends Actor {
