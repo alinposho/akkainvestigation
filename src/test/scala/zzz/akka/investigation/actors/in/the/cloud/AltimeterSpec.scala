@@ -27,6 +27,8 @@ trait EventSourceSpy extends EventSource {
   }
 }
 
+class SlicedAltimenter extends Altimeter with EventSourceSpy
+
 @RunWith(classOf[JUnitRunner])
 class AltimeterSpec extends TestKit(ActorSystem("AltemeterSpec"))
   with ImplicitSender
@@ -41,11 +43,10 @@ class AltimeterSpec extends TestKit(ActorSystem("AltemeterSpec"))
 
   override def afterAll(): Unit = system.shutdown()
 
-  class SlicedAltimenter extends Altimeter with EventSourceSpy
-
   def actor() = {
-    //    TestActorRef[Altimeter](Props[SlicedAltimenter]) // This raises an exception
-    TestActorRef[Altimeter](Props(new SlicedAltimenter()))
+    TestActorRef[SlicedAltimenter]
+    //    TestActorRef[Altimeter](Props(new SlicedAltimenter())) // This way of 
+    //instantiating Actors is deprecated
   }
 
   "Altimeter" should {
