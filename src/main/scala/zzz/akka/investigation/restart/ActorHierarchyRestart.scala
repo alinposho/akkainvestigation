@@ -7,62 +7,42 @@ import akka.actor.ActorRef
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
-class Parent extends Actor {
-
-  val child = context.actorOf(Props[Child], "Child")
-
+/**
+ * Trait to be mixed in when one needs to print start/stop/restart information 
+ * at stdout.
+ */
+trait RestartLogging extends Actor {
   override def preStart() = {
-    println("The Parent Actor started.");
+    println(s"The ${self.path.name} Actor started.");
   }
 
   override def preRestart(reason: Throwable, message: Option[Any]) = {
     super.preRestart(reason, message)
-    println(s"preRestart: The Parent Actor restarted because of: $reason.");
+    println(s"preRestart: The ${self.path.name} Actor restarted because of: $reason.");
   }
 
   override def postStop() = {
-    println("The Parent Actor stopped.");
+    println(s"The ${self.path.name} Actor stopped.");
   }
 
   override def postRestart(reason: Throwable) = {
     super.postRestart(reason)
-    println(s"postRestart: The Parent Actor restarted because of: $reason.");
-  }
-
-  def receive = {
-    case msg =>
-      println(s"Received message $msg. Throwing exception!");
-      throw new Exception("Restart this actor!")
+    println(s"postRestart: The ${self.path.name} Actor restarted because of: $reason.");
   }
 
 }
 
-class Child extends Actor {
-
-  override def preStart() = {
-    println("The Child Actor started.");
-  }
-
-  override def preRestart(reason: Throwable, message: Option[Any]) = {
-    super.preRestart(reason, message)
-    println(s"preRestart: The Child Actor restarted because of: $reason.");
-    postStop()
-  }
-
-  override def postStop() = {
-    println("The Child Actor stopped.");
-  }
-
-  override def postRestart(reason: Throwable) = {
-    super.postRestart(reason)
-    println(s"postRestart: The Child Actor restarted because of: $reason.");
-  }
-
-  def receive = {
+class GrumpyActor extends Actor with RestartLogging {
+   def receive = {
     case msg =>
       println(s"Received message $msg. Throwing exception!");
       throw new Exception("Restart this actor!")
   }
+}
+
+class Parent extends GrumpyActor {
+
+  val child = context.actorOf(Props[GrumpyActor], "Child")
 
 }
 
@@ -75,7 +55,7 @@ object ActorHierarchyRestart {
     // the child Actor's method hooks.
     restartActor(parent)
 
-    system.scheduler.scheduleOnce(5 seconds) {
+    system.scheduler.scheduleOnce(2 seconds) {
       system.shutdown()
     }
   }
