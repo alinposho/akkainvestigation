@@ -7,5 +7,6 @@ class AutoPilot extends Actor {
   
   def receive = {
     case ReadyToGo => 
+      throw new Exception(s"This actor ${self.path.name} should not receive the ReadyToGo message!")
   }
 }
