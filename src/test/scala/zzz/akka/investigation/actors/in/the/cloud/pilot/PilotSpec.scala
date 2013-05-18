@@ -19,18 +19,12 @@ case class DummyCopilot extends Actor {
     case _ =>
   }
 }
-// There has to be some better way of doing this
-case class DummyAutopilot extends Actor {
-  def receive = {
-    case _ =>
-  }
-}
 
 // There has to be some better way of doing this
 class TestPilotParent extends Actor {
-  
+
   def pilot = context.actorOf(Props[Pilot])
-  
+
   def receive = {
     case msg =>
       throw new Exception(s"We received message $msg when we didn't expect it.")
@@ -50,15 +44,16 @@ class PilotSpec extends TestKit(ActorSystem("PilotSpecActorSystem"))
   private var pilot: TestActorRef[Pilot] = null
 
   override def beforeEach() {
-    pilot = TestActorRef[Pilot]
+    pilot = TestActorRef[Pilot](Props(classOf[Pilot], system.deadLetters, 
+        system.deadLetters, system.deadLetters, system.deadLetters))
   }
 
   override def afterAll = system.shutdown()
 
   "Pilot" should {
 
-    "ask its parent Actor for the controls when ReadyToGo" in {
-      pilot.underlyingActor.parent = testActor
+    "ask its plane Actor for the controls when ReadyToGo" in {
+      pilot.underlyingActor.plane = testActor
       pilot ! ReadyToGo
       expectMsg(GiveMeControl)
     }
@@ -69,20 +64,10 @@ class PilotSpec extends TestKit(ActorSystem("PilotSpecActorSystem"))
       assert(pilot.underlyingActor.copilot === copilot)
     }
 
-    "get a reference to its Autopilot when ReadyToGo" in {
-      val autopilot = createAutopilot()
-      pilot ! ReadyToGo
-      assert(pilot.underlyingActor.autopilot === autopilot)
-    }
-
   }
 
   private def createCopilot() = {
     system.actorOf(Props[DummyCopilot], pilot.underlyingActor.copilotName)
-  }
-
-  private def createAutopilot() = {
-    system.actorOf(Props[DummyAutopilot], AutoPilotName)
   }
 
 }
