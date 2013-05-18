@@ -15,7 +15,7 @@ trait AttendantCreationPolicy {
  * A trait that adds flexibility on FlightAttendant creation.
  */
 trait LeadFlightAttendantProvider {
-  def newFlightAttendant: Props = LeadFlightAttendant()
+  def newLeadFlightAttendant: Props = LeadFlightAttendant()
 }
 
 object LeadFlightAttendant {

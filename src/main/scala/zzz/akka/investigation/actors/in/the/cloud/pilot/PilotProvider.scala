@@ -1,9 +1,10 @@
 package zzz.akka.investigation.actors.in.the.cloud.pilot
 
 import akka.actor.Actor
+import akka.actor.Props
 
 trait PilotProvider {
-  def pilot: Actor = new Pilot
-  def copilot: Actor = new CoPilot
-  def autopilot: Actor = new AutoPilot
+  def newPilot = Props[Pilot]
+  def newCopilot= Props[CoPilot]
+  def newAutopilot = Props[AutoPilot]
 }

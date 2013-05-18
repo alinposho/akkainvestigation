@@ -3,6 +3,10 @@ package zzz.akka.investigation.actors.in.the.cloud.pilot
 import akka.actor.Actor
 import Pilots.ReadyToGo
 
+object AutoPilot {
+  val Name = "Autopilot"
+}
+
 class AutoPilot extends Actor {
   
   def receive = {

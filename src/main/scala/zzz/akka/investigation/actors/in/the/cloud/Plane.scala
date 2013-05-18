@@ -2,45 +2,90 @@ package zzz.akka.investigation.actors.in.the.cloud
 
 import akka.actor.{ Actor, ActorLogging, ActorRef }
 import akka.actor.Props
+import akka.pattern.ask
+import akka.util.Timeout
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 import zzz.akka.investigation.actors.in.the.cloud.pilot.CoPilot
 import zzz.akka.investigation.actors.in.the.cloud.pilot.Pilot
 import zzz.akka.investigation.actors.in.the.cloud.pilot.Pilots
 import zzz.akka.investigation.actors.in.the.cloud.pilot.AutoPilot
+import zzz.akka.investigation.actors.in.the.cloud.pilot.PilotProvider
+import zzz.akka.investigation.actors.in.the.cloud.supervisor.IsolatedStopSupervisor
+import zzz.akka.investigation.actors.in.the.cloud.supervisor.OneForOneSupervisionStrategy
+import zzz.akka.investigation.actors.in.the.cloud.supervisor.IsolatedResumeSupervisor
+import scala.concurrent.Await
+import zzz.akka.investigation.actors.in.the.cloud.supervisor.IsolatedLifeCycleSupervisor
+import zzz.akka.investigation.actors.in.the.cloud.supervisor.IsolatedStopSupervisor
 
 object Plane {
   case object GiveMeControl
-  
+
   val Name = "Plane"
+  val Controls = "Controls"
+  val PilotsSupervisorName = "Pilots"
+}
+
+class ResumeSupervisor extends IsolatedResumeSupervisor with OneForOneSupervisionStrategy
+  with PilotProvider
+  with AltimeterProvider {
+
+  def childStarter() {
+    context.actorOf(newAutopilot, AutoPilot.Name)
+    val alt = context.actorOf(altimeter, Altimeter.Name)
+    context.actorOf(Props(classOf[ControlSurfaces], alt), ControlSurfaces.Name)
+  }
+}
+
+class StopSupervisor extends IsolatedStopSupervisor with OneForOneSupervisionStrategy
+  with PilotProvider
+  with LeadFlightAttendantProvider {
+
+  val config = context.system.settings.config
+  val PilotName = config.getString("zzz.akka.avionics.flightcrew.pilotName")
+  val CopilotName = config.getString("zzz.akka.avionics.flightcrew.copilotName")
+
+  def childStarter() {
+    context.actorOf(newPilot, PilotName)
+    context.actorOf(newCopilot, CopilotName)
+  }
+
 }
 
 class Plane extends Actor with ActorLogging {
+  this: LeadFlightAttendantProvider =>
 
   import Altimeter._
   import Plane._
   import EventSource.RegisterListener
+  import IsolatedLifeCycleSupervisor.WaitForStart
 
-  // Need to call the companion object constructor for Altimeter otherwise, an exception will be raised since
-  // the class doesn't define the "eventSourceReceive" method 
-  val altimeter = context.actorOf(Altimeter(), Altimeter.Name)
-  val controls = context.actorOf(Props(classOf[ControlSurfaces], altimeter), ControlSurfaces.Name)
+  implicit val timeout = Timeout(5.seconds)
+
   val config = context.system.settings.config
-  val pilot = context.actorOf(Props[Pilot], config.getString("zzz.akka.avionics.flightcrew.pilotName"))
-  val copilot = context.actorOf(Props[CoPilot], config.getString("zzz.akka.avionics.flightcrew.copilotName"))
-  val autopilot = context.actorOf(Props[AutoPilot], "AutoPilot")
-  val flightAttendant = context.actorOf(LeadFlightAttendant(), config.getString("zzz.akka.avionics.flightcrew.leadAttendantName"))
+  val LeadFlightAttendantName = config.getString("zzz.akka.avionics.flightcrew.leadAttendantName")
 
-  // This is deprecated. Use the code above
-  // val controls = context.actorOf(Props(new ControlSurfaces(altimeter))) 
+  def startControls() {
+    val controls = context.actorOf(Props[ResumeSupervisor], Controls)
+    Await.result(controls ? WaitForStart, 1 second)
+  }
+
+  def startPeople() {
+    val people = context.actorOf(Props[StopSupervisor], PilotsSupervisorName)
+    Await.result(people ? WaitForStart, 1.second)
+    
+    context.actorOf(newLeadFlightAttendant, LeadFlightAttendantName)
+  }
 
   override def preStart() {
-    altimeter ! RegisterListener(self)
-    List(pilot, copilot) foreach { _ ! Pilots.ReadyToGo }
+   startPeople()
+   startControls()
   }
 
   def receive = {
     case GiveMeControl =>
       log.info("Plane giving control to " + sender)
-      sender ! controls // Notice that it's perfectly legal to send a reference
+    //      sender ! controls // Notice that it's perfectly legal to send a reference
     // in the response message
     case AltitudeUpdate(altitude) =>
       log.info(s"Altitude is now: $altitude")
