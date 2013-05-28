@@ -6,8 +6,8 @@ import akka.actor.SupervisorStrategy._
 import akka.actor.ActorKilledException
 import SupervisionStrategyFactory._
 
-abstract class IsolatedResumeSupervisor(maxNrRetries: Int = InfinteNumberOfRetries,
-  withinTimeRange: Duration = Duration.Inf)
+abstract class IsolatedResumeSupervisor(
+    maxNrRetries: Int = InfinteNumberOfRetries, withinTimeRange: Duration = Duration.Inf)
   extends IsolatedLifeCycleSupervisor {
   this: SupervisionStrategyFactory =>
 

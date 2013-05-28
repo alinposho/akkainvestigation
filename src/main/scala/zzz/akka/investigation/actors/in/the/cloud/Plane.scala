@@ -26,18 +26,20 @@ object Plane {
   val PilotsSupervisorName = "Pilots"
 }
 
-class ResumeSupervisor extends IsolatedResumeSupervisor with OneForOneSupervisionStrategy
+class ResumeSupervisor extends IsolatedResumeSupervisor
+  with OneForOneSupervisionStrategy
   with PilotProvider
   with AltimeterProvider {
 
-  def childStarter() {
+  override def childStarter() {
     context.actorOf(newAutopilot, AutoPilot.Name)
     val alt = context.actorOf(altimeter, Altimeter.Name)
     context.actorOf(Props(classOf[ControlSurfaces], alt), ControlSurfaces.Name)
   }
 }
 
-class StopSupervisor extends IsolatedStopSupervisor with OneForOneSupervisionStrategy
+class StopSupervisor extends IsolatedStopSupervisor
+  with OneForOneSupervisionStrategy
   with PilotProvider
   with LeadFlightAttendantProvider {
 
@@ -45,7 +47,8 @@ class StopSupervisor extends IsolatedStopSupervisor with OneForOneSupervisionStr
   val PilotName = config.getString("zzz.akka.avionics.flightcrew.pilotName")
   val CopilotName = config.getString("zzz.akka.avionics.flightcrew.copilotName")
 
-  def childStarter() {
+  override def childStarter() {
+    // Need to provide the appropriate arguments to the Pilot instance.
     context.actorOf(newPilot, PilotName)
     context.actorOf(newCopilot, CopilotName)
   }
@@ -65,21 +68,23 @@ class Plane extends Actor with ActorLogging {
   val config = context.system.settings.config
   val LeadFlightAttendantName = config.getString("zzz.akka.avionics.flightcrew.leadAttendantName")
 
+  var controls: ActorRef = null;
+
   def startControls() {
-    val controls = context.actorOf(Props[ResumeSupervisor], Controls)
+    controls = context.actorOf(Props[ResumeSupervisor], Controls)
     Await.result(controls ? WaitForStart, 1 second)
   }
 
   def startPeople() {
     val people = context.actorOf(Props[StopSupervisor], PilotsSupervisorName)
-    Await.result(people ? WaitForStart, 1.second)
-    
+    Await.result(people ? WaitForStart, 5.second)
+
     context.actorOf(newLeadFlightAttendant, LeadFlightAttendantName)
   }
 
   override def preStart() {
-   startPeople()
-   startControls()
+    startPeople()
+    startControls()
   }
 
   def receive = {

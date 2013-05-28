@@ -7,7 +7,7 @@ import akka.actor.SupervisorStrategy._
 import SupervisionStrategyFactory._
 
 abstract class IsolatedStopSupervisor(
-  maxNrRetries: Int = InfinteNumberOfRetries, withinTimeRange: Duration = Duration.Inf)
+  maxNrRetries: Int = InfinteNumberOfRetries, withinTimeRange: Duration = Duration.Inf) 
   extends IsolatedLifeCycleSupervisor {
   this: SupervisionStrategyFactory =>
     
