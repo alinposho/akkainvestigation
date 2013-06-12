@@ -23,7 +23,7 @@ object Plane {
   case object GiveMeControl
 
   val Name = "Plane"
-  val Controls = "Controls"
+  val ControlsName = "Controls"
   val PilotsSupervisorName = "Pilots"
 }
 
@@ -42,15 +42,17 @@ class ResumeSupervisor extends IsolatedResumeSupervisor
 class StopSupervisor(val plane: ActorRef,
                      val autopilot: ActorRef,
                      val controls: ActorRef,
-                     val altimeter: ActorRef)
+                     val altimeter: ActorRef,
+                     val pilotName: String,
+                     val copilotName: String)
   extends IsolatedStopSupervisor
   with OneForOneSupervisionStrategy
   with PilotProvider
   with LeadFlightAttendantProvider {
 
   override def childStarter() {
-    context.actorOf(Props(classOf[CoPilot], plane, autopilot, altimeter), "Copilot")
-    context.actorOf(Props(classOf[Pilot], plane, autopilot, controls, altimeter), "Pilot")
+    context.actorOf(Props(classOf[CoPilot], plane, autopilot, altimeter), copilotName)
+    context.actorOf(Props(classOf[Pilot], plane, autopilot, controls, altimeter), pilotName)
   }
 }
 
@@ -66,8 +68,8 @@ class Plane extends Actor with ActorLogging {
 
   val config = context.system.settings.config
   val LeadFlightAttendantName = config.getString("zzz.akka.avionics.flightcrew.leadAttendantName")
-  val PilotName = config.getString("zzz.akka.avionics.flightcrew.pilotName")
-  val CopilotName = config.getString("zzz.akka.avionics.flightcrew.copilotName")
+  val pilotName = config.getString("zzz.akka.avionics.flightcrew.pilotName")
+  val copilotName = config.getString("zzz.akka.avionics.flightcrew.copilotName")
 
   var controls: ActorRef = null;
 
@@ -77,16 +79,16 @@ class Plane extends Actor with ActorLogging {
     startPeople()
     // Bootstrap the system
     actorForControls(Altimeter.Name) ! EventSource.RegisterListener(self)
-    actorForPilots(PilotName) ! Pilots.ReadyToGo
-    actorForPilots(CopilotName) ! Pilots.ReadyToGo
+    actorForPilots(pilotName) ! Pilots.ReadyToGo
+    actorForPilots(copilotName) ! Pilots.ReadyToGo
   }
 
-  def actorForControls(name: String) = context.actorFor("Controls/" + name)
+  def actorForControls(name: String) = context.actorFor(ControlsName + "/" + name)
   // Helps us look up Actors within the "Pilots" Supervisor
-  def actorForPilots(name: String) = context.actorFor("Pilots/" + name)
+  def actorForPilots(name: String) = context.actorFor(PilotsSupervisorName + "/" + name)
 
   private def startControls() {
-    controls = context.actorOf(Props[ResumeSupervisor], Controls)
+    controls = context.actorOf(Props[ResumeSupervisor], ControlsName)
     Await.result(controls ? WaitForStart, 1 second)
   }
 
@@ -97,7 +99,7 @@ class Plane extends Actor with ActorLogging {
     val altimeter = actorForControls(Altimeter.Name)
 
     val people = context.actorOf(Props(classOf[StopSupervisor], plane, controls,
-      autopilot, altimeter), PilotsSupervisorName)
+      autopilot, altimeter, pilotName, copilotName), PilotsSupervisorName)
 
     // Use the default strategy here, which restarts indefinitely
     context.actorOf(newLeadFlightAttendant, LeadFlightAttendantName)
@@ -108,7 +110,7 @@ class Plane extends Actor with ActorLogging {
   def receive = {
     case GiveMeControl =>
       log.info("Plane giving control to " + sender)
-    //      sender ! controls // Notice that it's perfectly legal to send a reference
+      sender ! actorForControls(ControlSurfaces.Name) // Notice that it's perfectly legal to send a reference
     // in the response message
     case AltitudeUpdate(altitude) =>
       log.info(s"Altitude is now: $altitude")
