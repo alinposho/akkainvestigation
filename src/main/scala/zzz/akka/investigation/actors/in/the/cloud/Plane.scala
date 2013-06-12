@@ -38,23 +38,6 @@ class ResumeSupervisor extends IsolatedResumeSupervisor
   }
 }
 
-class StopSupervisor extends IsolatedStopSupervisor
-  with OneForOneSupervisionStrategy
-  with PilotProvider
-  with LeadFlightAttendantProvider {
-
-  val config = context.system.settings.config
-  val PilotName = config.getString("zzz.akka.avionics.flightcrew.pilotName")
-  val CopilotName = config.getString("zzz.akka.avionics.flightcrew.copilotName")
-
-  override def childStarter() {
-    // Need to provide the appropriate arguments to the Pilot instance.
-    context.actorOf(newPilot, PilotName)
-    context.actorOf(newCoPilot, CopilotName)
-  }
-
-}
-
 class Plane extends Actor with ActorLogging {
   this: LeadFlightAttendantProvider with PilotProvider =>
 
