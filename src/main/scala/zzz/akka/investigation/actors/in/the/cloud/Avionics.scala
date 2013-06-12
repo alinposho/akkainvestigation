@@ -6,8 +6,9 @@ import scala.concurrent.Await
 import akka.util.Timeout
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import zzz.akka.investigation.actors.in.the.cloud.pilot.PilotProvider
 
-class PlaneWithFlightAttendantProvider extends Plane with LeadFlightAttendantProvider
+class PlaneWithFlightAttendantProvider extends Plane with LeadFlightAttendantProvider with PilotProvider
 
 object Avionics {
 

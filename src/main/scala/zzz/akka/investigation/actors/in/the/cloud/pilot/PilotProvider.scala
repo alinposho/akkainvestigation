@@ -5,6 +5,6 @@ import akka.actor.Props
 
 trait PilotProvider {
   def newPilot = Props[Pilot]
-  def newCopilot= Props[CoPilot]
+  def newCoPilot= Props[CoPilot]
   def newAutopilot = Props[AutoPilot]
 }

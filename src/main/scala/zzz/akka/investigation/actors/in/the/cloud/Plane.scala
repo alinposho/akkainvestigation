@@ -50,13 +50,13 @@ class StopSupervisor extends IsolatedStopSupervisor
   override def childStarter() {
     // Need to provide the appropriate arguments to the Pilot instance.
     context.actorOf(newPilot, PilotName)
-    context.actorOf(newCopilot, CopilotName)
+    context.actorOf(newCoPilot, CopilotName)
   }
 
 }
 
 class Plane extends Actor with ActorLogging {
-  this: LeadFlightAttendantProvider =>
+  this: LeadFlightAttendantProvider with PilotProvider =>
 
   import Altimeter._
   import Plane._
@@ -67,24 +67,41 @@ class Plane extends Actor with ActorLogging {
 
   val config = context.system.settings.config
   val LeadFlightAttendantName = config.getString("zzz.akka.avionics.flightcrew.leadAttendantName")
+  val PilotName = config.getString("zzz.akka.avionics.flightcrew.pilotName")
+  val CopilotName = config.getString("zzz.akka.avionics.flightcrew.copilotName")
 
   var controls: ActorRef = null;
 
-  def startControls() {
+  override def preStart() {
+    startControls()
+    startPeople()
+  }
+
+  private def startControls() {
     controls = context.actorOf(Props[ResumeSupervisor], Controls)
     Await.result(controls ? WaitForStart, 1 second)
   }
 
-  def startPeople() {
-    val people = context.actorOf(Props[StopSupervisor], PilotsSupervisorName)
+  def actorForControls(name: String) = context.actorFor("Controls/" + name)
+
+  private def startPeople() {
+    val plane = this
+    val controls = actorForControls("ControlSurfaces")
+    val autopilot = actorForControls("AutoPilot")
+    val altimeter = actorForControls("Altimeter")
+    val people = context.actorOf(Props(new IsolatedStopSupervisor with OneForOneSupervisionStrategy {
+      def childStarter() {
+        context.actorOf(Props(classOf[CoPilot], plane, autopilot, altimeter))
+        context.actorOf(Props(classOf[Pilot], plane, autopilot, controls, altimeter), PilotName)
+      }
+    }), "Pilots")
+    // Use the default strategy here, which
+    // restarts indefinitely
+    context.actorOf(newLeadFlightAttendant, LeadFlightAttendantName)
+    Await.result(people ? WaitForStart, 1.second)
     Await.result(people ? WaitForStart, 5.second)
 
     context.actorOf(newLeadFlightAttendant, LeadFlightAttendantName)
-  }
-
-  override def preStart() {
-    startPeople()
-    startControls()
   }
 
   def receive = {

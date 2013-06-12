@@ -11,7 +11,7 @@ object Pilots {
   val AutoPilotName = "AutoPilot"
 }
 
-class Pilot(var plane: ActorRef,
+class Pilot (var plane: ActorRef,
             autopilot: ActorRef,
             var controls: ActorRef,
             altimeter: ActorRef) extends Actor {
