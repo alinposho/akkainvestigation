@@ -67,7 +67,7 @@ class Plane extends Actor with ActorLogging {
   implicit val timeout = Timeout(5.seconds)
 
   val config = context.system.settings.config
-  val LeadFlightAttendantName = config.getString("zzz.akka.avionics.flightcrew.leadAttendantName")
+  val leadFlightAttendantName = config.getString("zzz.akka.avionics.flightcrew.leadAttendantName")
   val pilotName = config.getString("zzz.akka.avionics.flightcrew.pilotName")
   val copilotName = config.getString("zzz.akka.avionics.flightcrew.copilotName")
 
@@ -102,9 +102,8 @@ class Plane extends Actor with ActorLogging {
       autopilot, altimeter, pilotName, copilotName), PilotsSupervisorName)
 
     // Use the default strategy here, which restarts indefinitely
-    context.actorOf(newLeadFlightAttendant, LeadFlightAttendantName)
+    context.actorOf(newLeadFlightAttendant, leadFlightAttendantName)
     Await.result(people ? WaitForStart, 5.second)
-
   }
 
   def receive = {
