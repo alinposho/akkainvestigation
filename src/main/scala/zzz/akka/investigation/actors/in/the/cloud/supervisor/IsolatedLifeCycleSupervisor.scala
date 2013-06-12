@@ -16,6 +16,7 @@ trait IsolatedLifeCycleSupervisor extends Actor {
 
   def receive = {
     case WaitForStart =>
+      println("Sender: " + sender + "\nSender type: " + sender.getClass());
       sender ! Started
     case msg =>
       throw new Exception(s"Don't call ${self.path.name} directly (${msg}).")

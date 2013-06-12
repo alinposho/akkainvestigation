@@ -17,6 +17,7 @@ import zzz.akka.investigation.actors.in.the.cloud.supervisor.IsolatedResumeSuper
 import scala.concurrent.Await
 import zzz.akka.investigation.actors.in.the.cloud.supervisor.IsolatedLifeCycleSupervisor
 import zzz.akka.investigation.actors.in.the.cloud.supervisor.IsolatedStopSupervisor
+import zzz.akka.investigation.actors.in.the.cloud.supervisor.IsolatedStopSupervisor
 
 object Plane {
   case object GiveMeControl
@@ -38,6 +39,21 @@ class ResumeSupervisor extends IsolatedResumeSupervisor
   }
 }
 
+class StopSupervisor(val plane: ActorRef,
+                     val autopilot: ActorRef,
+                     val controls: ActorRef,
+                     val altimeter: ActorRef)
+  extends IsolatedStopSupervisor
+  with OneForOneSupervisionStrategy
+  with PilotProvider
+  with LeadFlightAttendantProvider {
+
+  override def childStarter() {
+    context.actorOf(Props(classOf[CoPilot], plane, autopilot, altimeter), "Copilot")
+    context.actorOf(Props(classOf[Pilot], plane, autopilot, controls, altimeter), "Pilot")
+  }
+}
+
 class Plane extends Actor with ActorLogging {
   this: LeadFlightAttendantProvider with PilotProvider =>
 
@@ -56,35 +72,37 @@ class Plane extends Actor with ActorLogging {
   var controls: ActorRef = null;
 
   override def preStart() {
+    // Get our children going. Order is important here! 
     startControls()
     startPeople()
+    // Bootstrap the system
+    actorForControls(Altimeter.Name) ! EventSource.RegisterListener(self)
+    actorForPilots(PilotName) ! Pilots.ReadyToGo
+    actorForPilots(CopilotName) ! Pilots.ReadyToGo
   }
+
+  def actorForControls(name: String) = context.actorFor("Controls/" + name)
+  // Helps us look up Actors within the "Pilots" Supervisor
+  def actorForPilots(name: String) = context.actorFor("Pilots/" + name)
 
   private def startControls() {
     controls = context.actorOf(Props[ResumeSupervisor], Controls)
     Await.result(controls ? WaitForStart, 1 second)
   }
 
-  def actorForControls(name: String) = context.actorFor("Controls/" + name)
-
   private def startPeople() {
-    val plane = this
-    val controls = actorForControls("ControlSurfaces")
-    val autopilot = actorForControls("AutoPilot")
-    val altimeter = actorForControls("Altimeter")
-    val people = context.actorOf(Props(new IsolatedStopSupervisor with OneForOneSupervisionStrategy {
-      def childStarter() {
-        context.actorOf(Props(classOf[CoPilot], plane, autopilot, altimeter))
-        context.actorOf(Props(classOf[Pilot], plane, autopilot, controls, altimeter), PilotName)
-      }
-    }), "Pilots")
-    // Use the default strategy here, which
-    // restarts indefinitely
+    val plane: ActorRef = self
+    val controls = actorForControls(ControlSurfaces.Name)
+    val autopilot = actorForControls(Pilots.AutoPilotName)
+    val altimeter = actorForControls(Altimeter.Name)
+
+    val people = context.actorOf(Props(classOf[StopSupervisor], plane, controls,
+      autopilot, altimeter), PilotsSupervisorName)
+
+    // Use the default strategy here, which restarts indefinitely
     context.actorOf(newLeadFlightAttendant, LeadFlightAttendantName)
-    Await.result(people ? WaitForStart, 1.second)
     Await.result(people ? WaitForStart, 5.second)
 
-    context.actorOf(newLeadFlightAttendant, LeadFlightAttendantName)
   }
 
   def receive = {

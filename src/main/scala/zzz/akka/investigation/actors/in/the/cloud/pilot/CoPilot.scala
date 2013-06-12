@@ -4,17 +4,17 @@ import akka.actor.Actor
 import akka.actor.ActorRef
 import Pilots._
 
-class CoPilot extends Actor {
+class CoPilot(var plane: ActorRef,
+               autopilot: ActorRef,
+               altimeter: ActorRef) extends Actor {
 
-  var controls: ActorRef = context.system.deadLetters
-  var pilot: ActorRef = context.system.deadLetters
-  var autopilot: ActorRef = context.system.deadLetters
   val pilotName = context.system.settings.config.getString("zzz.akka.avionics.flightcrew.pilotName")
+  
+  var pilot: ActorRef = context.system.deadLetters
 
   def receive = {
     case ReadyToGo =>
       pilot = context.actorFor("../" + pilotName)
-      autopilot = context.actorFor("../" + AutoPilotName)
   }
 
 }
