@@ -1,13 +1,19 @@
 package zzz.akka.investigation.actors.in.the.cloud
 
-import akka.actor.{ Actor, ActorRef, ActorSystem, Cancellable, Props }
-import akka.pattern.ask
 import scala.concurrent.Await
-import akka.util.Timeout
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import zzz.akka.investigation.actors.in.the.cloud.pilot.PilotProvider
+import scala.concurrent.duration.DurationInt
+import scala.concurrent.duration.FiniteDuration
+
+import akka.actor.ActorRef
+import akka.actor.ActorSystem
+import akka.actor.Cancellable
+import akka.actor.Props
+import akka.actor.actorRef2Scala
+import akka.pattern.ask
+import akka.util.Timeout
 import zzz.akka.investigation.actors.in.the.cloud.fight.attendant.LeadFlightAttendantProvider
+import zzz.akka.investigation.actors.in.the.cloud.pilot.PilotProvider
 
 class PlaneWithFlightAttendantProvider extends Plane with LeadFlightAttendantProvider with PilotProvider
 
