@@ -1,6 +1,4 @@
-package zzz.akka.investigation.actors.in.the.cloud
-
-import akka.actor.Props
+package zzz.akka.investigation.actors.in.the.cloud.fight.attendant
 
 object FlightAttendantPathChecker {
  

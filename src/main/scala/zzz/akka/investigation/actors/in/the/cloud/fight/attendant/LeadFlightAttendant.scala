@@ -1,10 +1,13 @@
-package zzz.akka.investigation.actors.in.the.cloud
+package zzz.akka.investigation.actors.in.the.cloud.fight.attendant
 
-import akka.actor.Props
-import akka.actor.ActorLogging
-import akka.actor.Actor
-import akka.actor.ActorRef
+import scala.collection.JavaConverters.asScalaBufferConverter
 import scala.util.Random
+
+import akka.actor.Actor
+import akka.actor.ActorLogging
+import akka.actor.ActorRef
+import akka.actor.Props
+import akka.actor.actorRef2Scala
 
 trait AttendantCreationPolicy {
   val numberOfAttendants = 8

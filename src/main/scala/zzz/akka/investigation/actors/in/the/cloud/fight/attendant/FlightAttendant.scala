@@ -1,11 +1,12 @@
-package zzz.akka.investigation.actors.in.the.cloud
+package zzz.akka.investigation.actors.in.the.cloud.fight.attendant
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
-import akka.actor.Props
-import akka.actor.ActorLogging
+import scala.concurrent.duration.DurationInt
+
 import akka.actor.Actor
+import akka.actor.ActorLogging
 import akka.actor.ActorRef
+import akka.actor.Props
 
 /**
  * Trait used to customize flight attendants responsiveness time.
