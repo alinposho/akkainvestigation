@@ -1,23 +1,17 @@
-package zzz.akka.investigation.actors.restarting
+package zzz.akka.investigation.actors.supervision
 
 import scala.concurrent.duration._
 import org.junit.runner.RunWith
-import org.scalatest.BeforeAndAfter
-import org.scalatest.BeforeAndAfterAll
-import org.scalatest.WordSpec
-import org.scalatest.junit.JUnitRunner
+import org.scalatest._
 import Supervisor._
-import akka.actor.Actor
-import akka.actor.ActorLogging
-import akka.actor.ActorRef
-import akka.actor.ActorSystem
-import akka.actor.OneForOneStrategy
-import akka.actor.Props
+import akka.actor._
 import akka.actor.SupervisorStrategy._
 import akka.testkit.ImplicitSender
 import akka.testkit.TestKit
 import org.scalatest.matchers.MustMatchers
 import akka.actor.Terminated
+import akka.actor.actorRef2Scala
+import org.scalatest.junit.JUnitRunner
 
 object Supervisor {
   val MaxNrOfRetries = 5;
@@ -40,6 +34,18 @@ class Supervisor() extends Actor {
 
   private def createChildAndSendIt(p: akka.actor.Props): Unit = {
     sender ! context.actorOf(p)
+  }
+}
+
+class IsolatedSupervisor extends Actor {
+  override val supervisorStrategy = OneForOneStrategy(2, 1 minute) {
+    case _: Exception => Escalate
+  }
+
+  override def preRestart(reason: Throwable, message: Option[Any]) { /* suppress child restart */ }
+
+  def receive = {
+    case p: Props => sender ! context.actorOf(p)
   }
 }
 
@@ -155,7 +161,7 @@ class ActorSupervisionSpec extends TestKit(ActorSystem("ActorSpec"))
 
       verifyIsAlive(child)
 
-      child ! new Exception("CRASH") // escalate failure
+      crashWithException(child)
       expectMsgPF() {
         case t @ Terminated(child) if t.existenceConfirmed ⇒ ()
       }
@@ -164,6 +170,23 @@ class ActorSupervisionSpec extends TestKit(ActorSystem("ActorSpec"))
     def verifyIsAlive(actor: ActorRef) {
       child ! Get
       expectMsg(DefaultState)
+    }
+  }
+
+  def crashWithException(actor: ActorRef) = {
+    actor ! new Exception("CRASH") // escalate failure
+  }
+
+  "Isolated supervisor actor" should {
+    "not restart its children when restarting" in {
+      val isolatedSupervisor = system.actorOf(Props[IsolatedSupervisor])
+      val child = createChild(isolatedSupervisor)
+
+      val newState = 42
+      setStateTo(newState, child)
+
+      crashWithException(child)
+      checkChildStateWasResetDueToRestart(child)
     }
   }
 
