@@ -50,7 +50,8 @@ class IsolatedSupervisor extends Actor {
 }
 
 class Child extends Actor with ActorLogging {
-
+  
+  println("child actor created!");
   var state = DefaultState
   def receive() = {
     case ex: Exception => throw ex
@@ -156,7 +157,7 @@ class ActorSupervisionSpec extends TestKit(ActorSystem("ActorSpec"))
   def causeTerminationOf(actor: ActorRef) = actor ! new IllegalArgumentException
 
   "The Supervisor actor" should {
-    "escalate the Exception to its parent" in {
+    "escalate the Exception to its parent and terminate its children" in {
       watch(child)
 
       verifyIsAlive(child)
@@ -178,7 +179,7 @@ class ActorSupervisionSpec extends TestKit(ActorSystem("ActorSpec"))
   }
 
   "Isolated supervisor actor" should {
-    "not restart its children when restarting" in {
+    "restart its children when restarting" in {
       val isolatedSupervisor = system.actorOf(Props[IsolatedSupervisor])
       val child = createChild(isolatedSupervisor)
 

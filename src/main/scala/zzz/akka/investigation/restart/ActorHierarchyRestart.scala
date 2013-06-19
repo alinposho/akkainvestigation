@@ -51,7 +51,7 @@ object ActorHierarchyRestart {
     val system = ActorSystem("ActorHierarchyRestart")
     val parent = system.actorOf(Props[Parent], "Parent")
 
-    // This method will restart the parent actor and, along with it, restart the child actor too, but without callling
+    // This method will restart the parent actor and, along with it, restart the child actor too, but without calling
     // the child Actor's method hooks.
     restartActor(parent)
 
