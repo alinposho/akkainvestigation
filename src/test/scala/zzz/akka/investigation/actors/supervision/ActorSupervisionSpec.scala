@@ -42,7 +42,7 @@ class IsolatedSupervisor extends Actor {
     case _: Exception => Escalate
   }
 
-  override def preRestart(reason: Throwable, message: Option[Any]) { /* suppress child restart */ }
+  override def preRestart(reason: Throwable, message: Option[Any]) { /* suppress child termination */ }
 
   def receive = {
     case p: Props => sender ! context.actorOf(p)
@@ -50,9 +50,14 @@ class IsolatedSupervisor extends Actor {
 }
 
 class Child extends Actor with ActorLogging {
-  
-  println("child actor created!");
+
   var state = DefaultState
+  
+  override def preRestart(reason: Throwable, message: Option[Any]){
+    println(s"Child actor ${self} will restart!");
+    super.preRestart(reason, message)
+  }
+  
   def receive() = {
     case ex: Exception => throw ex
     case x: Int => state = x
@@ -180,8 +185,10 @@ class ActorSupervisionSpec extends TestKit(ActorSystem("ActorSpec"))
 
   "Isolated supervisor actor" should {
     "restart its children when restarting" in {
+      
       val isolatedSupervisor = system.actorOf(Props[IsolatedSupervisor])
       val child = createChild(isolatedSupervisor)
+      watch(child);
 
       val newState = 42
       setStateTo(newState, child)
