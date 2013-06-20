@@ -49,7 +49,7 @@ class IsolatedSupervisor extends Actor {
   }
 }
 
-class Child extends Actor with ActorLogging {
+class Child extends Actor {
 
   var state = DefaultState
   
