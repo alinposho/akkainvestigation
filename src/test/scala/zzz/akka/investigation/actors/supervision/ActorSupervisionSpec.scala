@@ -192,6 +192,7 @@ class ActorSupervisionSpec extends TestKit(ActorSystem("ActorSpec"))
 
       val newState = 42
       setStateTo(newState, child)
+      checkStateEqualTo(newState, child)
 
       crashWithException(child)
       checkChildStateWasResetDueToRestart(child)
