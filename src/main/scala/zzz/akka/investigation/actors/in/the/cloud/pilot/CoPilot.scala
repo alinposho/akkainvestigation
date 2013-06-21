@@ -8,8 +8,8 @@ import akka.actor.Terminated
 import zzz.akka.investigation.actors.in.the.cloud.Plane.GiveMeControl
 
 class CoPilot(var plane: ActorRef,
-  autopilot: ActorRef,
-  altimeter: ActorRef) extends Actor {
+              autopilot: ActorRef,
+              altimeter: ActorRef) extends Actor {
 
   val pilotName = context.system.settings.config.getString("zzz.akka.avionics.flightcrew.pilotName")
 

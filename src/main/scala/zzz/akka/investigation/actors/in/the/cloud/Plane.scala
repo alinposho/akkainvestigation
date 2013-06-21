@@ -22,19 +22,21 @@ import zzz.akka.investigation.actors.in.the.cloud.fight.attendant.LeadFlightAtte
 
 object Plane {
   case object GiveMeControl
+  case class GetPerson(name: String)
+  case class PersonReference(actor: ActorRef)
 
   val Name = "Plane"
   val ControlsName = "Controls"
   val PilotsSupervisorName = "Pilots"
 }
 
-class ResumeSupervisor extends IsolatedResumeSupervisor
+class ResumeSupervisor(plane: ActorRef) extends IsolatedResumeSupervisor
   with OneForOneSupervisionStrategy
   with PilotProvider
   with AltimeterProvider {
 
   override def childStarter() {
-    context.actorOf(newAutopilot, AutoPilot.Name)
+    context.actorOf(Props(classOf[AutoPilot], plane), AutoPilot.Name)
     val alt = context.actorOf(altimeter, Altimeter.Name)
     context.actorOf(Props(classOf[ControlSurfaces], alt), ControlSurfaces.Name)
   }
@@ -64,6 +66,7 @@ class Plane extends Actor with ActorLogging {
   import Plane._
   import EventSource.RegisterListener
   import IsolatedLifeCycleSupervisor.WaitForStart
+  import Pilots._
 
   implicit val timeout = Timeout(5.seconds)
 
@@ -80,16 +83,13 @@ class Plane extends Actor with ActorLogging {
     startPeople()
     // Bootstrap the system
     actorForControls(Altimeter.Name) ! EventSource.RegisterListener(self)
-    actorForPilots(pilotName) ! Pilots.ReadyToGo
-    actorForPilots(copilotName) ! Pilots.ReadyToGo
+    actorForPilots(pilotName) ! ReadyToGo
+    actorForPilots(copilotName) ! ReadyToGo
+    actorForPilots(AutoPilot.Name) ! ReadyToGo
   }
 
-  def actorForControls(name: String) = context.actorFor(ControlsName + "/" + name)
-  // Helps us look up Actors within the "Pilots" Supervisor
-  def actorForPilots(name: String) = context.actorFor(PilotsSupervisorName + "/" + name)
-
   private def startControls() {
-    controls = context.actorOf(Props[ResumeSupervisor], ControlsName)
+    controls = context.actorOf(Props(classOf[ResumeSupervisor], self), ControlsName)
     Await.result(controls ? WaitForStart, 1 second)
   }
 
@@ -106,6 +106,9 @@ class Plane extends Actor with ActorLogging {
     context.actorOf(newLeadFlightAttendant, leadFlightAttendantName)
     Await.result(people ? WaitForStart, 5.second)
   }
+  
+  def actorForControls(name: String) = context.actorFor(ControlsName + "/" + name)
+  def actorForPilots(name: String) = context.actorFor(PilotsSupervisorName + "/" + name)
 
   def receive = {
     case GiveMeControl =>
@@ -114,5 +117,6 @@ class Plane extends Actor with ActorLogging {
     // in the response message
     case AltitudeUpdate(altitude) =>
       log.info(s"Altitude is now: $altitude")
+    case GetPerson(actorName) => sender ! PersonReference(actorForPilots(actorName)); 
   }
 }

@@ -8,18 +8,17 @@ import akka.testkit.ImplicitSender
 import org.scalatest.matchers.MustMatchers
 import org.scalatest._
 import akka.actor._
-import CoPilotSpec._
+import PilotsSpecConfig._
 import zzz.akka.investigation.actors.in.the.cloud.supervisor._
 import akka.util.Timeout
 import scala.concurrent.duration._
 import scala.concurrent.Await
-import scala.concurrent.ExecutionContext.Implicits.global
 import akka.pattern.ask
 import zzz.akka.investigation.actors.in.the.cloud.Plane._
 import com.typesafe.config.ConfigFactory
 
 @RunWith(classOf[JUnitRunner])
-class CoPilotSpec extends TestKit(ActorSystem("CopilotSpec", ConfigFactory.parseString(CoPilotSpec.configStr))) 
+class CoPilotSpec extends TestKit(ActorSystem("CopilotSpec", ConfigFactory.parseString(PilotsSpecConfig.configStr))) 
 					with MustMatchers
 					with ImplicitSender
 					with WordSpec 
@@ -70,21 +69,6 @@ class FakePilot extends Actor {
   override def receive = {
     case _ => throw new Exception("This exception is expected.")
   }
-}
-
-class NilActor extends Actor {
-  def receive = {
-    case _ => 
-  }
-}
-
-object CoPilotSpec {
-  val copilotName = "Mary"
-  val pilotName = "Mark"
-  val configStr = s"""
-  					zzz.akka.avionics.flightcrew.copilotName = "$copilotName"
-  					zzz.akka.avionics.flightcrew.pilotName = "$pilotName"
-  					"""
 }
 
 class PilotsSupervisor(testActor: ActorRef) 
