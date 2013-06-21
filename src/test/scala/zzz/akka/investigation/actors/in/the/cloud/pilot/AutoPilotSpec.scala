@@ -16,6 +16,7 @@ import Pilots._
 import zzz.akka.investigation.actors.in.the.cloud.Plane.{ GiveMeControl, GetPerson, PersonReference }
 import akka.actor.ActorRef
 import scala.concurrent.duration._
+import akka.testkit.TestActorRef
 
 @RunWith(classOf[JUnitRunner])
 class AutoPilotSpec extends TestKit(ActorSystem("AutoPilotSpec", ConfigFactory.parseString(PilotsSpecConfig.configStr)))
@@ -27,17 +28,23 @@ class AutoPilotSpec extends TestKit(ActorSystem("AutoPilotSpec", ConfigFactory.p
   override def afterAll() = system.shutdown()
 
   "Autopilot" should {
+    "assign the testActor as its plane" in {
+      val autopilot = TestActorRef[AutoPilot](Props(classOf[AutoPilot], testActor))
+
+      assert(testActor === autopilot.underlyingActor.plane)
+    }
+
     "take control of the plane when the copilot dies" in {
       // Prepare
-      val autopilot = system.actorOf(Props(classOf[AutoPilot], testActor), AutoPilotName)
       val copilot = system.actorOf(Props[FakeCoPilot], copilotName)
+      val autopilot = TestActorRef[AutoPilot](Props(classOf[AutoPilot], testActor))
       autopilot ! ReadyToGo
 
       // Exercise
-      expectMsg(GetPerson(copilotName)) 
+      expectMsg(GetPerson(copilotName))
       autopilot ! PersonReference(copilot)
       system.stop(copilot)
-      
+
       // Verify      
       expectMsg(5 seconds, GiveMeControl)
     }

@@ -22,13 +22,8 @@ class AutoPilot(val plane: ActorRef) extends Actor {
 
   def receive = {
     case ReadyToGo =>
-      val autopilotContext = context
-      val result = Await.result(plane ? GetPerson(copilotName), 100 seconds)
-      result match {
-        case PersonReference(copilot) =>
-          autopilotContext.watch(copilot)
-        case msg => throw new Exception(s"Unexpected message $msg")
-      }
+      val result = Await.result((plane ? GetPerson(copilotName)).mapTo[PersonReference], 3 seconds)
+      context.watch(result.actor)
     case Terminated(_) =>
       plane ! GiveMeControl
     case controlSurfaces: ActorRef =>
