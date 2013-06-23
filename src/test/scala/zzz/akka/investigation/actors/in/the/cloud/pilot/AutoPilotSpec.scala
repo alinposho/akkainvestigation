@@ -46,7 +46,7 @@ class AutoPilotSpec extends TestKit(ActorSystem("AutoPilotSpec", ConfigFactory.p
       system.stop(copilot)
 
       // Verify      
-      expectMsg(5 seconds, GiveMeControl)
+      expectMsg(3 seconds, GiveMeControl)
     }
   }
 

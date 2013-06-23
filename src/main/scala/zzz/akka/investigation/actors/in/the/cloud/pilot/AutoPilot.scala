@@ -20,10 +20,16 @@ class AutoPilot(val plane: ActorRef) extends Actor {
   val copilotName = context.system.settings.config.getString("zzz.akka.avionics.flightcrew.copilotName")
   var controls: ActorRef = _
 
+  /**
+   * Please be careful since there if a direct dependency between ReadyToGo,
+   *  PersonReference(ref), Terminated(_), ActorRef messages. They need to arrive in 
+   *  this specific order for the actor to work.
+   */
   def receive = {
     case ReadyToGo =>
-      val result = Await.result((plane ? GetPerson(copilotName)).mapTo[PersonReference], 3 seconds)
-      context.watch(result.actor)
+      plane ! GetPerson(copilotName)
+    case PersonReference(copilotRef) =>
+      context.watch(copilotRef)
     case Terminated(_) =>
       plane ! GiveMeControl
     case controlSurfaces: ActorRef =>
