@@ -36,13 +36,20 @@ class FlightAttendantSpec extends TestKit(ActorSystem("FlightAttendantTestSystem
     //      expectMsg(Drink(Soda))
     //    }
 
-    "assist passengers above anything else" in {
+    "assist injured passengers before anything else" in {
       val attendant = TestActorRef[TestFlightAttendant]
-//      attendant.underlyingActor.pendingDelivery = Some(mock(Cancellable))
       
       attendant ! Assist(testActor)
 
       expectMsg(Drink(MagicHealingPoltion))
+    }
+    
+    "raise an exception when receiving an unknown msg" in {
+      val attendant = TestActorRef[TestFlightAttendant]
+            
+      intercept[Exception] {
+        attendant.receive('ThisIsSupposedToBeAnUnknowsMsg)//This will not swallow the exception raised for the unknown message
+      }
     }
   }
   
