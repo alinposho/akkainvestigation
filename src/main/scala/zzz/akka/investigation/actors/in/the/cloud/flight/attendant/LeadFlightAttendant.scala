@@ -1,4 +1,4 @@
-package zzz.akka.investigation.actors.in.the.cloud.fight.attendant
+package zzz.akka.investigation.actors.in.the.cloud.flight.attendant
 
 import scala.collection.JavaConverters.asScalaBufferConverter
 import scala.util.Random

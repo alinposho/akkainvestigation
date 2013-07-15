@@ -18,7 +18,7 @@ import scala.concurrent.Await
 import zzz.akka.investigation.actors.in.the.cloud.supervisor.IsolatedLifeCycleSupervisor
 import zzz.akka.investigation.actors.in.the.cloud.supervisor.IsolatedStopSupervisor
 import zzz.akka.investigation.actors.in.the.cloud.supervisor.IsolatedStopSupervisor
-import zzz.akka.investigation.actors.in.the.cloud.fight.attendant.LeadFlightAttendantProvider
+import zzz.akka.investigation.actors.in.the.cloud.flight.attendant.LeadFlightAttendantProvider
 
 object Plane {
   case object GiveMeControl

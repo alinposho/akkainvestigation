@@ -1,4 +1,4 @@
-package zzz.akka.investigation.actors.in.the.cloud.fight.attendant
+package zzz.akka.investigation.actors.in.the.cloud.flight.attendant
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.DurationInt

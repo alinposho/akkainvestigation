@@ -12,7 +12,7 @@ import akka.actor.Props
 import akka.actor.actorRef2Scala
 import akka.pattern.ask
 import akka.util.Timeout
-import zzz.akka.investigation.actors.in.the.cloud.fight.attendant.LeadFlightAttendantProvider
+import zzz.akka.investigation.actors.in.the.cloud.flight.attendant.LeadFlightAttendantProvider
 import zzz.akka.investigation.actors.in.the.cloud.pilot.PilotProvider
 
 class PlaneWithFlightAttendantProvider extends Plane with LeadFlightAttendantProvider with PilotProvider
