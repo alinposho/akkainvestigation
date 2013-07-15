@@ -15,6 +15,7 @@ import akka.testkit.TestActorRef
 import akka.testkit.TestKit
 import org.scalatest.junit.JUnitRunner
 import akka.actor.Cancellable
+import akka.actor.ActorRef
 
 @RunWith(classOf[JUnitRunner])
 class FlightAttendantSpec extends TestKit(ActorSystem("FlightAttendantTestSystem", ConfigFactory.parseString("akka.scheduler.tick-duration = 1ms")))
@@ -28,31 +29,46 @@ class FlightAttendantSpec extends TestKit(ActorSystem("FlightAttendantTestSystem
   override def afterAll() = system.shutdown()
 
   "FlightAttendant" should {
-    //    "get a drink when asked" in {
-    //      val attendant = system.actorOf(TestFlightAttendant())
-    //
-    //      attendant ! GetDrink(Soda)
-    //
-    //      expectMsg(Drink(Soda))
-    //    }
 
     "assist injured passengers before anything else" in {
       val attendant = TestActorRef[TestFlightAttendant]
-      
+
       attendant ! Assist(testActor)
 
       expectMsg(Drink(MagicHealingPoltion))
     }
-    
-    "raise an exception when receiving an unknown msg" in {
+
+    "be available to handle drink requests" in {
       val attendant = TestActorRef[TestFlightAttendant]
-            
-      intercept[Exception] {
-        attendant.receive('ThisIsSupposedToBeAnUnknowsMsg)//This will not swallow the exception raised for the unknown message
-      }
+
+      attendant ! Busy_?
+
+      expectMsg(No)
     }
+
+    "get a drink when available to handle drink requests" in {
+      val attendant = system.actorOf(TestFlightAttendant())
+
+      assertAvailableToHandleDrinkRequests(attendant)
+      attendant ! GetDrink(Soda)
+
+      expectMsg(Drink(Soda))
+    }
+    
+    "handle only the specified person's request" in {
+       val attendant = TestActorRef[TestFlightAttendant]
+//       attendant.underlyingActor.handleSpecificPerson(person)
+
+    }
+
+    def assertAvailableToHandleDrinkRequests(attendant: ActorRef) {
+      attendant ! Busy_?
+      expectMsg(No)
+    }
+    
+    
   }
-  
+
 }
 
 object TestFlightAttendant {

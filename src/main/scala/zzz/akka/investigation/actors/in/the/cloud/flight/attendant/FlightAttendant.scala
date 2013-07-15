@@ -24,7 +24,7 @@ object FlightAttendant {
   case object Busy_?
   case object Yes
   case object No
-  
+
   val MagicHealingPoltion = "Magic Healing Potion"
 
   class DefaultFlightAttendant extends FlightAttendant with AttendantResponsiveness {
@@ -46,7 +46,7 @@ class FlightAttendant extends Actor with ActorLogging { this: AttendantResponsiv
     context.system.scheduler.scheduleOnce(responseDuration, self, DeliverDrink(Drink(drinkName)))
   }
 
-  def receive = assistInjuredPassanger orElse handleUnsupportedMsgs
+  def receive = assistInjuredPassanger orElse handleDrinkRequests
 
   def assistInjuredPassanger: Receive = {
     case Assist(passanger) =>
@@ -56,17 +56,27 @@ class FlightAttendant extends Actor with ActorLogging { this: AttendantResponsiv
       passanger ! Drink(MagicHealingPoltion)
   }
 
-  def handleUnsupportedMsgs: Receive = {
-    case msg =>
-      throw new Exception(s"Received unexpected message $msg")
+  def handleDrinkRequests: Receive = {
+    case GetDrink(drinkName) =>
+      pendingDelivery = Some(scheduleDelivery(drinkName))
+      context.become(assistInjuredPassanger orElse handleSpecificPerson(sender))
+    case Busy_? =>
+      sender ! No
   }
 
-  //  def receive = {
-  //    case GetDrink(drinkName) =>
-  //      sendDrinkWithDelay(drinkName, sender)
-  //    case msg =>
-  //      log.error(s"Received unexpected message $msg")
-  //  }
+  def handleSpecificPerson(person: ActorRef): Receive = {
+    case GetDrink(drinkName) if (person == sender) =>
+      pendingDelivery foreach (_.cancel())
+      pendingDelivery = Some(scheduleDelivery(drinkName))
+    case DeliverDrink(drink) =>
+      person ! drink
+      pendingDelivery = None
+      context.become(assistInjuredPassanger orElse handleDrinkRequests)
+    case m: GetDrink =>
+      context.parent forward m
+    case Busy_? =>
+      sender ! Yes
+  }
 
   private def sendDrinkWithDelay(drinkName: String, receiver: ActorRef): Unit = {
     context.system.scheduler.scheduleOnce(responseDuration, receiver, Drink(drinkName))
