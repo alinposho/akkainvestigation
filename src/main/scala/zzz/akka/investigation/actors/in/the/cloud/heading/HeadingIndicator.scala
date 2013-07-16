@@ -4,6 +4,8 @@ import zzz.akka.investigation.actors.in.the.cloud.EventSource
 import akka.actor.ActorLogging
 import akka.actor.Actor
 import scala.concurrent.duration._
+import zzz.akka.investigation.actors.in.the.cloud.ProductionEventSource
+import akka.actor.Props
 
 object HeadingIndicator {
   case class BankChange(amount: Float)
@@ -11,8 +13,12 @@ object HeadingIndicator {
 
   case object Tick
 
-  val MinAmount = 1.0f
-  val MaxAmount = -1.0f
+  val MaxRateOfBank = 1.0f
+  val MinRateOfBank = -1.0f
+
+  class HeadingIndicatorWithEventSource extends HeadingIndicator with ProductionEventSource
+
+  def apply() = Props[HeadingIndicatorWithEventSource]
 }
 
 class HeadingIndicator extends Actor with ActorLogging { this: EventSource =>
@@ -25,14 +31,14 @@ class HeadingIndicator extends Actor with ActorLogging { this: EventSource =>
   var lastTick = System.currentTimeMillis()
   var rateOfBank = 0f
   var heading = 0f
-  
+
   override def postStop(): Unit = ticker.cancel
 
   def receive = eventSourceReceive orElse headingIndicatorReceive
 
   def headingIndicatorReceive: Receive = {
     case BankChange(amount) =>
-      rateOfBank = amount.min(MinAmount).max(MaxAmount)
+      rateOfBank = amount.min(MaxRateOfBank).max(MinRateOfBank)
     case Tick =>
       calculateNewHeading()
       sendEvent(HeadingUpdate(heading))
