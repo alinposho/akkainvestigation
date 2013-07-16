@@ -1,33 +1,20 @@
 package zzz.akka.investigation.actors.in.the.cloud.altimeter
 
-import java.util.concurrent.CountDownLatch
-import akka.actor.ActorSystem
-import akka.testkit.TestKit
-import akka.testkit.ImplicitSender
+import java.util.concurrent.TimeUnit
+import org.junit.runner.RunWith
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
-import org.scalatest.BeforeAndAfterAll
-import akka.testkit.TestActorRef
-import java.util.concurrent.TimeUnit
-import zzz.akka.investigation.actors.in.the.cloud.EventSource.RegisterListener
-import org.junit.runner.RunWith
+import akka.actor.ActorSystem
 import akka.actor.actorRef2Scala
-import zzz.akka.investigation.actors.in.the.cloud.EventSource
+import akka.testkit.ImplicitSender
+import akka.testkit.TestActorRef
+import akka.testkit.TestKit
+import zzz.akka.investigation.actors.in.the.cloud.EventSource.RegisterListener
+import zzz.akka.investigation.actors.in.the.cloud.EventSourceSpy
 import zzz.akka.investigation.actors.in.the.cloud.altimeter.Altimeter.AltitudeUpdate
 import zzz.akka.investigation.actors.in.the.cloud.altimeter.Altimeter.RateChange
 import org.scalatest.junit.JUnitRunner
-
-object EventSourceSpy {
-  val latch = new CountDownLatch(1)
-}
-
-trait EventSourceSpy extends EventSource {
-  override def sendEvent[T](event: T): Unit = EventSourceSpy.latch.countDown()
-  override def eventSourceReceive = {
-    // Make sure we don't interfere with the other events by matching only the empty string event
-    case "" => println("Received empty string");
-  }
-}
 
 class SlicedAltimenter extends Altimeter with EventSourceSpy
 
