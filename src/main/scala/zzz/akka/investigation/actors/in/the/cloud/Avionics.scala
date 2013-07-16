@@ -4,7 +4,6 @@ import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.duration.FiniteDuration
-
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Cancellable
@@ -14,6 +13,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import zzz.akka.investigation.actors.in.the.cloud.flight.attendant.LeadFlightAttendantProvider
 import zzz.akka.investigation.actors.in.the.cloud.pilot.PilotProvider
+import zzz.akka.investigation.actors.in.the.cloud.altimeter.Altimeter
 
 class PlaneWithFlightAttendantProvider extends Plane with LeadFlightAttendantProvider with PilotProvider
 

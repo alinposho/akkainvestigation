@@ -2,6 +2,7 @@ package zzz.akka.investigation.actors.in.the.cloud
 
 import akka.actor.{Actor, ActorRef}
 import akka.actor.Props
+import zzz.akka.investigation.actors.in.the.cloud.altimeter.Altimeter
 
 /**
  * This object carries messages for controlling the plane.

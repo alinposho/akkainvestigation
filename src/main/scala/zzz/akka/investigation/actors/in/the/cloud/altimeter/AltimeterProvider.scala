@@ -1,4 +1,4 @@
-package zzz.akka.investigation.actors.in.the.cloud
+package zzz.akka.investigation.actors.in.the.cloud.altimeter
 
 import akka.actor.Props
 

@@ -19,6 +19,8 @@ import zzz.akka.investigation.actors.in.the.cloud.supervisor.IsolatedLifeCycleSu
 import zzz.akka.investigation.actors.in.the.cloud.supervisor.IsolatedStopSupervisor
 import zzz.akka.investigation.actors.in.the.cloud.supervisor.IsolatedStopSupervisor
 import zzz.akka.investigation.actors.in.the.cloud.flight.attendant.LeadFlightAttendantProvider
+import zzz.akka.investigation.actors.in.the.cloud.altimeter.AltimeterProvider
+import zzz.akka.investigation.actors.in.the.cloud.altimeter.Altimeter
 
 object Plane {
   case object GiveMeControl

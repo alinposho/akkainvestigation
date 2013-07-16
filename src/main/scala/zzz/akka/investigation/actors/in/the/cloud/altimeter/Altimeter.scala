@@ -1,10 +1,9 @@
-package zzz.akka.investigation.actors.in.the.cloud
-
-import akka.actor.{ Actor, ActorLogging, ActorSystem, Props }
-// The duration package  objects extends Ints with some timing functionality
+package zzz.akka.investigation.actors.in.the.cloud.altimeter
+import akka.actor.{Actor, ActorLogging, Props}
 import scala.concurrent.duration._
-// The scheduler needs and excution context - we'll just use the global one
 import scala.concurrent.ExecutionContext.Implicits.global
+import zzz.akka.investigation.actors.in.the.cloud.EventSource
+import zzz.akka.investigation.actors.in.the.cloud.ProductionEventSource
 
 object Altimeter {
   val MinAmount = -1.0F
@@ -29,7 +28,7 @@ class Altimeter extends Actor with ActorLogging { this: EventSource =>
   // In "feet per minute"
   val maxRateOfClimb = 5000
   var rateOfClimb: Float = 0
-  var altitude = 0.0 // Initialized to Double
+  var altitude = 0.0
   // As time passes, we need to change the altitude based on the time passed.
   // The lastTick allows us to figure out how much time has passed
   var lastTick = System.currentTimeMillis()
