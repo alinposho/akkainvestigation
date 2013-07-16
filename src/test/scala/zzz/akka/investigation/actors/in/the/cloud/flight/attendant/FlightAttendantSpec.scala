@@ -47,7 +47,7 @@ class FlightAttendantSpec extends TestKit(ActorSystem("FlightAttendantTestSystem
     }
 
     "get a drink when available to handle drink requests" in {
-      val attendant = system.actorOf(TestFlightAttendant())
+      val attendant = TestActorRef[TestFlightAttendant]
 
       assertAvailableToHandleDrinkRequests(attendant)
       attendant ! GetDrink(Soda)
@@ -55,20 +55,11 @@ class FlightAttendantSpec extends TestKit(ActorSystem("FlightAttendantTestSystem
       expectMsg(Drink(Soda))
     }
     
-    "handle only the specified person's request" in {
-       val attendant = TestActorRef[TestFlightAttendant]
-//       attendant.underlyingActor.handleSpecificPerson(person)
-
-    }
-
     def assertAvailableToHandleDrinkRequests(attendant: ActorRef) {
       attendant ! Busy_?
       expectMsg(No)
     }
-    
-    
   }
-
 }
 
 object TestFlightAttendant {
@@ -77,6 +68,4 @@ object TestFlightAttendant {
     val ONE_MILLI = 1
     override val maxResponseTimeMS = ONE_MILLI
   }
-
-  def apply(): Props = Props[TestFlightAttendant]
 }
