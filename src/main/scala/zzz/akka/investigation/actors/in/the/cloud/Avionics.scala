@@ -14,6 +14,7 @@ import akka.util.Timeout
 import zzz.akka.investigation.actors.in.the.cloud.flight.attendant.LeadFlightAttendantProvider
 import zzz.akka.investigation.actors.in.the.cloud.pilot.PilotProvider
 import zzz.akka.investigation.actors.in.the.cloud.altimeter.Altimeter
+import zzz.akka.investigation.actors.in.the.cloud.heading.HeadingIndicator
 
 class PlaneWithFlightAttendantProvider extends Plane with LeadFlightAttendantProvider with PilotProvider
 
@@ -30,6 +31,7 @@ object Avionics {
   def main(args: Array[String]) {
 
     takeoff()
+    moveLeft()
     levelOut(1.seconds)
     climb()
     levelOut(4.seconds)
@@ -39,6 +41,12 @@ object Avionics {
   private def takeoff(): Cancellable = {
     system.scheduler.scheduleOnce(200.milli) {
       control ! ControlSurfaces.StickBack(Altimeter.MaxAmount)
+    }
+  }
+  
+  private def moveLeft() = {
+    system.scheduler.scheduleOnce(200.milli) {
+      control ! ControlSurfaces.StickLeft(HeadingIndicator.MaxRateOfBank)
     }
   }
 

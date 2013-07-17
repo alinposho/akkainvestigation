@@ -43,7 +43,7 @@ class ResumeSupervisor(plane: ActorRef) extends IsolatedResumeSupervisor
   override def childStarter() {
     context.actorOf(Props(classOf[AutoPilot], plane), AutoPilot.Name)
     val alt = context.actorOf(altimeter, Altimeter.Name)
-    val heading= context.actorOf(headingIndicator, HeadingIndicator.Name)
+    val heading = context.actorOf(headingIndicator, HeadingIndicator.Name)
     context.actorOf(Props(classOf[ControlSurfaces], alt, heading), ControlSurfaces.Name)
   }
 }
@@ -90,6 +90,7 @@ class Plane extends Actor with ActorLogging {
     startPeople()
     // Bootstrap the system
     actorForControls(Altimeter.Name) ! EventSource.RegisterListener(self)
+    actorForControls(HeadingIndicator.Name) ! EventSource.RegisterListener(self)
     actorForPilots(pilotName) ! ReadyToGo
     actorForPilots(copilotName) ! ReadyToGo
     actorForPilots(AutoPilot.Name) ! ReadyToGo
