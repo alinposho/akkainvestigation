@@ -21,7 +21,6 @@ class SlicedAltimenter extends Altimeter with EventSourceSpy
 
 @RunWith(classOf[JUnitRunner])
 class AltimeterSpec extends TestKit(ActorSystem("AltemeterSpec"))
-					  with EventSourceSpySpec
 					  with ImplicitSender
 					  with WordSpec
 					  with MustMatchers
@@ -34,7 +33,7 @@ class AltimeterSpec extends TestKit(ActorSystem("AltemeterSpec"))
 
   override def afterAll(): Unit = system.shutdown()
 
-  def createTestActor[SlicedAltimenter]() = TestActorRef[SlicedAltimenter]
+  def createTestActor() = TestActorRef[SlicedAltimenter]
 
   "Altimeter" should {
 
@@ -66,10 +65,9 @@ class AltimeterSpec extends TestKit(ActorSystem("AltemeterSpec"))
       val ref = createTestActor()
       assertEventsAreSent()
     }
-  }
-
-  def assertEventsAreSent() {
-    EventSourceSpy.latch.await(1, TimeUnit.SECONDS) must be(true)
+    def assertEventsAreSent() {
+      EventSourceSpy.latch.await(1, TimeUnit.SECONDS) must be(true)
+    }
   }
 }
 

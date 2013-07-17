@@ -18,10 +18,10 @@ class SlicedHeadingIndicator extends HeadingIndicator with EventSourceSpy
 
 @RunWith(classOf[JUnitRunner])
 class HeadingIndicatorSpec extends TestKit(ActorSystem("HeadingIndicator"))
-							with ImplicitSender
-							with WordSpec
-							with MustMatchers
-							with BeforeAndAfterAll {
+  with ImplicitSender
+  with WordSpec
+  with MustMatchers
+  with BeforeAndAfterAll {
 
   import EventSource.RegisterListener
   import HeadingIndicator._
@@ -31,8 +31,8 @@ class HeadingIndicatorSpec extends TestKit(ActorSystem("HeadingIndicator"))
   val BellowMinRateOfBankChange = -2f
 
   override def afterAll(): Unit = system.shutdown()
-      
-   def actor() = {
+
+  def actor() = {
     TestActorRef[SlicedHeadingIndicator]
   }
 
@@ -40,25 +40,19 @@ class HeadingIndicatorSpec extends TestKit(ActorSystem("HeadingIndicator"))
 
     "record rate of climb changes" in {
       val actorRef = actor().underlyingActor
-      
       actorRef.receive(BankChange(MaxRateOfBankChange))
-      
       actorRef.rateOfBank must be(MaxRateOfBank)
     }
 
     "keep rate of bank changes within the upper bounds" in {
       val actorRef = actor().underlyingActor
-      
       actorRef.receive(BankChange(AboveMaxRateOfBankChange))
-      
       actorRef.rateOfBank must be(MaxRateOfBank)
     }
-    
+
     "keep rate of bank changes within the lower bounds" in {
       val actorRef = actor().underlyingActor
-      
       actorRef.receive(BankChange(BellowMinRateOfBankChange))
-      
       actorRef.rateOfBank must be(MinRateOfBank)
     }
 
@@ -78,9 +72,10 @@ class HeadingIndicatorSpec extends TestKit(ActorSystem("HeadingIndicator"))
       val ref = actor()
       assertEventsAreSent()
     }
+    
+    def assertEventsAreSent() {
+      EventSourceSpy.latch.await(1, TimeUnit.SECONDS) must be(true)
+    }
   }
 
-  def assertEventsAreSent() {
-    EventSourceSpy.latch.await(1, TimeUnit.SECONDS) must be(true)
-  }
 }

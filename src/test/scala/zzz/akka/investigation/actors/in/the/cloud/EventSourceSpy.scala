@@ -20,11 +20,10 @@ trait EventSourceSpy extends EventSource {
 }
 
 trait EventSourceSpySpec extends MustMatchers with WordSpec {
-  def createTestActor[T <: Actor](): TestActorRef[T]
+  def eventSourceActorRef[T <: Actor](): TestActorRef[T]
 
   "EventSource" should {
     "send events" in {
-      val ref = createTestActor()
       assertEventsAreSent()
     }
   }
