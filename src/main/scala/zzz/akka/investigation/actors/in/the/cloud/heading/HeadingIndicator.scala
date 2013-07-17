@@ -15,6 +15,7 @@ object HeadingIndicator {
 
   val MaxRateOfBank = 1.0f
   val MinRateOfBank = -1.0f
+  val Name = "HeadingIndicator"
 
   class HeadingIndicatorWithEventSource extends HeadingIndicator with ProductionEventSource
 

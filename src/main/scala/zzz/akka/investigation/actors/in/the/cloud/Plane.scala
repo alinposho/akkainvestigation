@@ -21,6 +21,8 @@ import zzz.akka.investigation.actors.in.the.cloud.supervisor.IsolatedStopSupervi
 import zzz.akka.investigation.actors.in.the.cloud.flight.attendant.LeadFlightAttendantProvider
 import zzz.akka.investigation.actors.in.the.cloud.altimeter.AltimeterProvider
 import zzz.akka.investigation.actors.in.the.cloud.altimeter.Altimeter
+import zzz.akka.investigation.actors.in.the.cloud.heading.HeadingIndicator
+import zzz.akka.investigation.actors.in.the.cloud.heading.HeadingIndicatorProvider
 
 object Plane {
   case object GiveMeControl
@@ -33,14 +35,16 @@ object Plane {
 }
 
 class ResumeSupervisor(plane: ActorRef) extends IsolatedResumeSupervisor
-  with OneForOneSupervisionStrategy
-  with PilotProvider
-  with AltimeterProvider {
+										  with OneForOneSupervisionStrategy
+										  with AltimeterProvider
+										  with HeadingIndicatorProvider
+										  with PilotProvider {
 
   override def childStarter() {
     context.actorOf(Props(classOf[AutoPilot], plane), AutoPilot.Name)
     val alt = context.actorOf(altimeter, Altimeter.Name)
-    context.actorOf(Props(classOf[ControlSurfaces], alt), ControlSurfaces.Name)
+    val heading= context.actorOf(headingIndicator, HeadingIndicator.Name)
+    context.actorOf(Props(classOf[ControlSurfaces], alt, heading), ControlSurfaces.Name)
   }
 }
 
@@ -50,10 +54,10 @@ class StopSupervisor(val plane: ActorRef,
                      val altimeter: ActorRef,
                      val pilotName: String,
                      val copilotName: String)
-  extends IsolatedStopSupervisor
-  with OneForOneSupervisionStrategy
-  with PilotProvider
-  with LeadFlightAttendantProvider {
+					  extends IsolatedStopSupervisor
+					  with OneForOneSupervisionStrategy
+					  with PilotProvider
+					  with LeadFlightAttendantProvider {
 
   override def childStarter() {
     context.actorOf(Props(classOf[CoPilot], plane, autopilot, altimeter), copilotName)
@@ -65,6 +69,7 @@ class Plane extends Actor with ActorLogging {
   this: LeadFlightAttendantProvider with PilotProvider =>
 
   import Altimeter._
+  import HeadingIndicator._
   import Plane._
   import EventSource.RegisterListener
   import IsolatedLifeCycleSupervisor.WaitForStart
@@ -119,6 +124,8 @@ class Plane extends Actor with ActorLogging {
     // in the response message
     case AltitudeUpdate(altitude) =>
       log.info(s"Altitude is now: $altitude")
+    case HeadingUpdate(newHeading) =>
+      log.info(s"Heading is now: $newHeading")
     case GetPerson(actorName) => sender ! PersonReference(actorForPilots(actorName)); 
   }
 }
