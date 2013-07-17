@@ -15,15 +15,17 @@ import zzz.akka.investigation.actors.in.the.cloud.EventSourceSpy
 import zzz.akka.investigation.actors.in.the.cloud.altimeter.Altimeter.AltitudeUpdate
 import zzz.akka.investigation.actors.in.the.cloud.altimeter.Altimeter.RateChange
 import org.scalatest.junit.JUnitRunner
+import zzz.akka.investigation.actors.in.the.cloud.EventSourceSpySpec
 
 class SlicedAltimenter extends Altimeter with EventSourceSpy
 
 @RunWith(classOf[JUnitRunner])
 class AltimeterSpec extends TestKit(ActorSystem("AltemeterSpec"))
-  with ImplicitSender
-  with WordSpec
-  with MustMatchers
-  with BeforeAndAfterAll {
+					  with EventSourceSpySpec
+					  with ImplicitSender
+					  with WordSpec
+					  with MustMatchers
+					  with BeforeAndAfterAll {
 
   import Altimeter._
 
@@ -32,20 +34,18 @@ class AltimeterSpec extends TestKit(ActorSystem("AltemeterSpec"))
 
   override def afterAll(): Unit = system.shutdown()
 
-  def actor() = {
-    TestActorRef[SlicedAltimenter]
-  }
+  def createTestActor[SlicedAltimenter]() = TestActorRef[SlicedAltimenter]
 
   "Altimeter" should {
 
     "record rate of climb changes" in {
-      val realActor = actor().underlyingActor
+      val realActor = createTestActor().underlyingActor
       realActor.receive(RateChange(MaxRateOfClimbChange))
       realActor.rateOfClimb must be(realActor.maxRateOfClimb)
     }
 
     "keep rate of climb changes within bounds" in {
-      val real = actor().underlyingActor
+      val real = createTestActor().underlyingActor
       real.receive(RateChange(AboveMaxRateOfClimbChange))
       real.rateOfClimb must be(real.maxRateOfClimb)
     }
@@ -63,7 +63,7 @@ class AltimeterSpec extends TestKit(ActorSystem("AltemeterSpec"))
     }
 
     "send events" in {
-      val ref = actor()
+      val ref = createTestActor()
       assertEventsAreSent()
     }
   }
