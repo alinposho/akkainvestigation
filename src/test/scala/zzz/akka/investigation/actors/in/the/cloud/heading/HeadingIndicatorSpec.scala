@@ -13,15 +13,17 @@ import java.util.concurrent.TimeUnit
 import akka.testkit.TestActorRef
 import zzz.akka.investigation.actors.in.the.cloud.EventSource
 import akka.actor.Props
+import zzz.akka.investigation.actors.in.the.cloud.EventSourceSpySpec
 
 class SlicedHeadingIndicator extends HeadingIndicator with EventSourceSpy
 
 @RunWith(classOf[JUnitRunner])
 class HeadingIndicatorSpec extends TestKit(ActorSystem("HeadingIndicator"))
-  with ImplicitSender
-  with WordSpec
-  with MustMatchers
-  with BeforeAndAfterAll {
+							  with EventSourceSpySpec
+							  with ImplicitSender
+							  with WordSpec
+							  with MustMatchers
+							  with BeforeAndAfterAll {
 
   import EventSource.RegisterListener
   import HeadingIndicator._
@@ -30,28 +32,26 @@ class HeadingIndicatorSpec extends TestKit(ActorSystem("HeadingIndicator"))
   val AboveMaxRateOfBankChange = 2f
   val BellowMinRateOfBankChange = -2f
 
+  type T = SlicedHeadingIndicator
+  override def createTestActor() = TestActorRef[SlicedHeadingIndicator]
   override def afterAll(): Unit = system.shutdown()
-
-  def actor() = {
-    TestActorRef[SlicedHeadingIndicator]
-  }
 
   "HeadingIndicator" should {
 
     "record rate of climb changes" in {
-      val actorRef = actor().underlyingActor
+      val actorRef = createTestActor().underlyingActor
       actorRef.receive(BankChange(MaxRateOfBankChange))
       actorRef.rateOfBank must be(MaxRateOfBank)
     }
 
     "keep rate of bank changes within the upper bounds" in {
-      val actorRef = actor().underlyingActor
+      val actorRef = createTestActor().underlyingActor
       actorRef.receive(BankChange(AboveMaxRateOfBankChange))
       actorRef.rateOfBank must be(MaxRateOfBank)
     }
 
     "keep rate of bank changes within the lower bounds" in {
-      val actorRef = actor().underlyingActor
+      val actorRef = createTestActor().underlyingActor
       actorRef.receive(BankChange(BellowMinRateOfBankChange))
       actorRef.rateOfBank must be(MinRateOfBank)
     }
@@ -67,15 +67,5 @@ class HeadingIndicatorSpec extends TestKit(ActorSystem("HeadingIndicator"))
         case HeadingUpdate(heading) => true
       }
     }
-
-    "send events" in {
-      val ref = actor()
-      assertEventsAreSent()
-    }
-    
-    def assertEventsAreSent() {
-      EventSourceSpy.latch.await(1, TimeUnit.SECONDS) must be(true)
-    }
   }
-
 }

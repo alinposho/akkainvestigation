@@ -18,3 +18,19 @@ trait EventSourceSpy extends EventSource {
     case "" => println("Received empty string");
   }
 }
+
+trait EventSourceSpySpec extends MustMatchers with WordSpec {
+  type T <: Actor
+  def createTestActor(): TestActorRef[T]
+
+  "EventSource" should {
+    "send events" in {
+      val ref = createTestActor()
+      assertEventsAreSent()
+    }
+  }
+
+  def assertEventsAreSent() {
+    EventSourceSpy.latch.await(1, TimeUnit.SECONDS) must be(true)
+  }
+}

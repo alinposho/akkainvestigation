@@ -1,13 +1,10 @@
 package zzz.akka.investigation.actors.in.the.cloud.altimeter
 
 import java.util.concurrent.TimeUnit
-
 import org.junit.runner.RunWith
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.WordSpec
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.MustMatchers
-
 import akka.actor.ActorSystem
 import akka.actor.actorRef2Scala
 import akka.testkit.ImplicitSender
@@ -17,11 +14,14 @@ import zzz.akka.investigation.actors.in.the.cloud.EventSource.RegisterListener
 import zzz.akka.investigation.actors.in.the.cloud.EventSourceSpy
 import zzz.akka.investigation.actors.in.the.cloud.altimeter.Altimeter.AltitudeUpdate
 import zzz.akka.investigation.actors.in.the.cloud.altimeter.Altimeter.RateChange
+import org.scalatest.junit.JUnitRunner
+import zzz.akka.investigation.actors.in.the.cloud.EventSourceSpySpec
 
 class SlicedAltimenter extends Altimeter with EventSourceSpy
 
 @RunWith(classOf[JUnitRunner])
 class AltimeterSpec extends TestKit(ActorSystem("AltemeterSpec"))
+					  with EventSourceSpySpec
 					  with ImplicitSender
 					  with WordSpec
 					  with MustMatchers
@@ -32,12 +32,11 @@ class AltimeterSpec extends TestKit(ActorSystem("AltemeterSpec"))
   val MaxRateOfClimbChange = 1f
   val AboveMaxRateOfClimbChange = 2f
 
+  type T = SlicedAltimenter
+  override def createTestActor() = TestActorRef[SlicedAltimenter]
   override def afterAll(): Unit = system.shutdown()
 
-  def createTestActor() = TestActorRef[SlicedAltimenter]
-
   "Altimeter" should {
-
     "record rate of climb changes" in {
       val realActor = createTestActor().underlyingActor
       realActor.receive(RateChange(MaxRateOfClimbChange))
@@ -60,14 +59,6 @@ class AltimeterSpec extends TestKit(ActorSystem("AltemeterSpec"))
         case AltitudeUpdate(altitude) if (altitude == 0f) => false
         case AltitudeUpdate(altitude) => true
       }
-    }
-
-    "send events" in {
-      val ref = createTestActor()
-      assertEventsAreSent()
-    }
-    def assertEventsAreSent() {
-      EventSourceSpy.latch.await(1, TimeUnit.SECONDS) must be(true)
     }
   }
 }
