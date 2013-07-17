@@ -28,7 +28,6 @@ class HeadingIndicatorSpec extends TestKit(ActorSystem("HeadingIndicator"))
   import EventSource.RegisterListener
   import HeadingIndicator._
 
-  val MaxRateOfBankChange = 1f
   val AboveMaxRateOfBankChange = 2f
   val BellowMinRateOfBankChange = -2f
 
@@ -40,7 +39,7 @@ class HeadingIndicatorSpec extends TestKit(ActorSystem("HeadingIndicator"))
 
     "record rate of climb changes" in {
       val actorRef = createTestActor().underlyingActor
-      actorRef.receive(BankChange(MaxRateOfBankChange))
+      actorRef.receive(BankChange(MaxRateOfBank))
       actorRef.rateOfBank must be(MaxRateOfBank)
     }
 
@@ -60,7 +59,7 @@ class HeadingIndicatorSpec extends TestKit(ActorSystem("HeadingIndicator"))
       val realActor = system.actorOf(HeadingIndicator())
       realActor ! RegisterListener(testActor)
 
-      realActor ! BankChange(MaxRateOfBankChange)
+      realActor ! BankChange(MaxRateOfBank)
 
       fishForMessage() {
         case HeadingUpdate(heading) if (heading == 0f) => false
