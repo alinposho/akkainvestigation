@@ -44,7 +44,7 @@ class ResumeSupervisor(plane: ActorRef) extends IsolatedResumeSupervisor
     context.actorOf(Props(classOf[AutoPilot], plane), AutoPilot.Name)
     val alt = context.actorOf(altimeter, Altimeter.Name)
     val heading = context.actorOf(headingIndicator, HeadingIndicator.Name)
-    context.actorOf(Props(classOf[ControlSurfaces], alt, heading), ControlSurfaces.Name)
+    context.actorOf(Props(classOf[ControlSurfaces], plane, alt, heading), ControlSurfaces.Name)
   }
 }
 
