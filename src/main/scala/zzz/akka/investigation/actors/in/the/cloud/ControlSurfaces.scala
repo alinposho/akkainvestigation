@@ -13,7 +13,7 @@ object ControlSurfaces {
   case class StickForward(amount: Float)
   case class StickLeft(amount: Float)
   case class StickRight(amount: Float)
-  case class HasControl(somePilot: ActorRef)
+  case class HasControl(newController: ActorRef)
 
   val Name = "ControlSurfaces"
 }
@@ -36,8 +36,10 @@ class ControlSurfaces(plane: ActorRef,
       heading ! BankChange(-1 * amount)
     case StickRight(amount) if (sender == controller) =>
       heading ! BankChange(amount)
-    case HasControl(newController) if (sender == plane) =>
+    case HasControl(newController) if sender == plane =>
       context.become(controlledBy(newController))
+    case m => 
+      throw new Exception(s"We should have not received this message ${m}")
   }
 }
 

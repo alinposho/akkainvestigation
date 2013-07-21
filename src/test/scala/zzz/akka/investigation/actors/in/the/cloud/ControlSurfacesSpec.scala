@@ -17,31 +17,71 @@ import akka.actor.Actor
 
 @RunWith(classOf[JUnitRunner])
 class ControlSurfacesSpec extends TestKit(ActorSystem("ControlSurfacesSpec"))
-							with WordSpec
-							with MustMatchers
-							with ImplicitSender
-							with BeforeAndAfterAll {
+  with WordSpec
+  with MustMatchers
+  with ImplicitSender
+  with BeforeAndAfterAll {
   import ControlSurfaces._
   import Altimeter._
-  
-  override def afterAll() = system.shutdown()
-  
-  "ControlSurfaces" should {
-    "change the controller when the plane asks" in {
-      val plane = TestActorRef[DummyActor]("plane")
-      val controlSurfaces = TestActorRef[ControlSurfaces](Props(classOf[ControlSurfaces], plane, testActor, testActor))
-      val newController = TestActorRef[DummyActor]("newController")
 
-      controlSurfaces ! (HasControl(newController), plane)
+  val PlaneActorName = "plane"
+  val plane = TestActorRef[DummyActor](PlaneActorName)
+  val NewContollerActorName = "newController"
+  val newController = TestActorRef[DummyActor](NewContollerActorName)
+
+  override def afterAll() = system.shutdown()
+  def createDummyActor = TestActorRef[DummyActor]
+
+  "ControlSurfaces" should {
+
+    "send commads to the altimeter when commig from the controller" in {
+      val altimeter = testActor
+      val controller = TestActorRef[DummyActor]
+      val controlSurfaces = createControlSurfacesForAltimeter(altimeter, controller)
+
+      val amount = 768.777f
+      controlSurfaces.!(StickForward(amount))(controller)
+      expectMsg(RateChange(-amount))
       
+      controlSurfaces.!(StickBack(amount))(controller)
+      expectMsg(RateChange(amount))
+    }
+
+    def createControlSurfacesForAltimeter(altimeter: ActorRef, controller: ActorRef) = {
+      val controlSurfaces = TestActorRef[ControlSurfaces](Props(classOf[ControlSurfaces], plane, altimeter, createDummyActor))
+      controlSurfaces.!(HasControl(controller))(plane)
+
+      controlSurfaces
+    }
+
+    "change the controller when the plane asks" in {
+      val controlSurfaces = TestActorRef[ControlSurfaces](Props(classOf[ControlSurfaces], plane, testActor, testActor))
+
+      controlSurfaces.!(HasControl(newController))(plane)
+
       assertControllerWasChangedTo(newController, controlSurfaces)
     }
-    
+
     def assertControllerWasChangedTo(newController: ActorRef, controlSurfaces: ActorRef) {
-      val amount =  89898.9f
-      controlSurfaces ! (StickBack(amount), newController)
-      
+      val amount = 89898.9f
+      controlSurfaces.!(StickBack(amount))(newController)
+
       expectMsg(RateChange(amount))
+    }
+
+    "NOT change the controller when anyone except for the plane asks it to" in {
+      val controlSurfaces = TestActorRef[ControlSurfaces](Props(classOf[ControlSurfaces], plane, testActor, testActor))
+
+      controlSurfaces ! HasControl(newController)
+
+      assertControllerWasNotChangedTo(newController, controlSurfaces)
+    }
+
+    def assertControllerWasNotChangedTo(newController: ActorRef, controlSurfaces: ActorRef) {
+      val amount = -1.9f
+      controlSurfaces.!(StickBack(amount))(newController)
+
+      expectNoMsg()
     }
   }
 
@@ -49,7 +89,7 @@ class ControlSurfacesSpec extends TestKit(ActorSystem("ControlSurfacesSpec"))
 
 class DummyActor extends Actor {
   def receive = {
-    case m => 
+    case m =>
       throw new Exception(s"We should not have received this message $m")
   }
 }
