@@ -11,6 +11,8 @@ case class Goodbye(greeting: String)
 
 class ActorWithChangingBehaviour extends Actor {
 
+  def receive = expectHello
+  
   def expectHello: Receive = {
     case Hello(greeting) =>
       sender ! Hello(greeting + " to you too!")
@@ -28,7 +30,6 @@ class ActorWithChangingBehaviour extends Actor {
       context.become(expectHello)
   }
 
-  def receive = expectHello
 }
 
 object ActorWithChangingBehaviour {
