@@ -38,8 +38,6 @@ class ControlSurfaces(plane: ActorRef,
       heading ! BankChange(amount)
     case HasControl(newController) if sender == plane =>
       context.become(controlledBy(newController))
-    case m => 
-      throw new Exception(s"We should have not received this message ${m}")
   }
 }
 
