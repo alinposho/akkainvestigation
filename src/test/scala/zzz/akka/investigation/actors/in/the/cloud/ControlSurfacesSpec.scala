@@ -14,20 +14,21 @@ import akka.actor.Props
 import akka.actor.ActorRef
 import zzz.akka.investigation.actors.in.the.cloud.altimeter.Altimeter
 import akka.actor.Actor
+import zzz.akka.investigation.actors.in.the.cloud.heading.HeadingIndicator
 
 @RunWith(classOf[JUnitRunner])
 class ControlSurfacesSpec extends TestKit(ActorSystem("ControlSurfacesSpec"))
-  with WordSpec
-  with MustMatchers
-  with ImplicitSender
-  with BeforeAndAfterAll {
+							  with WordSpec
+							  with MustMatchers
+							  with ImplicitSender
+							  with BeforeAndAfterAll {
   import ControlSurfaces._
   import Altimeter._
+  import HeadingIndicator._
 
-  val PlaneActorName = "plane"
-  val plane = TestActorRef[DummyActor](PlaneActorName)
-  val NewContollerActorName = "newController"
-  val newController = TestActorRef[DummyActor](NewContollerActorName)
+  val plane = TestActorRef[DummyActor]("plane")
+  val newController = TestActorRef[DummyActor]("newController")
+  val controller = TestActorRef[DummyActor]("controller")
 
   override def afterAll() = system.shutdown()
   def createDummyActor = TestActorRef[DummyActor]
@@ -36,19 +37,37 @@ class ControlSurfacesSpec extends TestKit(ActorSystem("ControlSurfacesSpec"))
 
     "send commads to the altimeter when commig from the controller" in {
       val altimeter = testActor
-      val controller = TestActorRef[DummyActor]
-      val controlSurfaces = createControlSurfacesForAltimeter(altimeter, controller)
+      val controlSurfaces = createControlSurfacesForAltimeter(altimeter)
 
       val amount = 768.777f
       controlSurfaces.!(StickForward(amount))(controller)
       expectMsg(RateChange(-amount))
-      
+
       controlSurfaces.!(StickBack(amount))(controller)
       expectMsg(RateChange(amount))
     }
 
-    def createControlSurfacesForAltimeter(altimeter: ActorRef, controller: ActorRef) = {
+    def createControlSurfacesForAltimeter(altimeter: ActorRef) = {
       val controlSurfaces = TestActorRef[ControlSurfaces](Props(classOf[ControlSurfaces], plane, altimeter, createDummyActor))
+      controlSurfaces.!(HasControl(controller))(plane)
+
+      controlSurfaces
+    }
+
+    "send commads to the heading indicator when commig from the controller" in {
+      val heading = testActor
+      val controlSurfaces = createControlSurfacesForHeading(heading)
+
+      val amount = 768.777f
+      controlSurfaces.!(StickLeft(amount))(controller)
+      expectMsg(BankChange(-amount))
+
+      controlSurfaces.!(StickRight(amount))(controller)
+      expectMsg(BankChange(amount))
+    }
+
+    def createControlSurfacesForHeading(heading: ActorRef) = {
+      val controlSurfaces = TestActorRef[ControlSurfaces](Props(classOf[ControlSurfaces], plane, createDummyActor, heading))
       controlSurfaces.!(HasControl(controller))(plane)
 
       controlSurfaces
