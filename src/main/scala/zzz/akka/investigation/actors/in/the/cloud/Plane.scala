@@ -26,6 +26,7 @@ import zzz.akka.investigation.actors.in.the.cloud.heading.HeadingIndicatorProvid
 
 object Plane {
   case object GiveMeControl
+  case object LostControl
   case class GetPerson(name: String)
   case class PersonReference(actor: ActorRef)
 

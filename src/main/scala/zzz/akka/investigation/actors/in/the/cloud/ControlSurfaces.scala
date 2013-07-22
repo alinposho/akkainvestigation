@@ -14,6 +14,7 @@ object ControlSurfaces {
   case class StickLeft(amount: Float)
   case class StickRight(amount: Float)
   case class HasControl(newController: ActorRef)
+  case class Controls(controlsRef: ActorRef)
 
   val Name = "ControlSurfaces"
 }
