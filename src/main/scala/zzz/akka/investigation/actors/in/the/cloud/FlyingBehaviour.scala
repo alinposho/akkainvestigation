@@ -122,6 +122,7 @@ class FlyingBehaviour(plane: ActorRef,
     case s if prepComplete(s.stateData) =>
       s.copy(stateName = Flying)
   })
+  
   when(Flying) {
     case Event(Adjust, flightData: FlightData) =>
       stay using adjust(flightData)
