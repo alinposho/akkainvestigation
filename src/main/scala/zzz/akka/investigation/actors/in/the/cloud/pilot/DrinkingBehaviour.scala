@@ -12,7 +12,7 @@ trait DrinkingResolution {
   def drinkInterval(): FiniteDuration = Random.nextInt(300) seconds
 }
 
-object DrikingBehaviour {
+object DrinkingBehaviour {
   case class BloodAlcoholLevelChanged(level: Float)
 
   case object FeelingSober
@@ -20,12 +20,15 @@ object DrikingBehaviour {
   case object FeelingLikeZaphod
 
   class DrinkingBehaviourWithResolution(drinker: ActorRef) extends DrinkingBehaviour(drinker) with DrinkingResolution
+  
+  val SoberBloodAlcoholLimit = 0.01
+  val TipsyBloodAlcoholLimit = 0.03
 }
 
 class DrinkingBehaviour(drinker: ActorRef) extends Actor {
   this: DrinkingResolution =>
 
-  import DrikingBehaviour._
+  import DrinkingBehaviour._
   import scala.concurrent.ExecutionContext.Implicits.global
 
   val SoberingBloodAlcoholLevelDecrease = -0.0001f
@@ -46,10 +49,10 @@ class DrinkingBehaviour(drinker: ActorRef) extends Actor {
   }
 
   def drinkAndGetFeeling() = {
-    if (currentBloodAlcoholLevel <= 0.01) {
+    if (currentBloodAlcoholLevel <= SoberBloodAlcoholLimit) {
       drink()
       FeelingSober
-    } else if (currentBloodAlcoholLevel <= 0.03) {
+    } else if (currentBloodAlcoholLevel <= TipsyBloodAlcoholLimit) {
       drink()
       FeelingTipsy
     } else FeelingLikeZaphod
