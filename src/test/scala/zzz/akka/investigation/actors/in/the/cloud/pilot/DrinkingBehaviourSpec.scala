@@ -13,34 +13,60 @@ import akka.testkit.TestActorRef
 import akka.actor.Props
 import scala.concurrent.duration._
 
+// TODO: Make the test create a new instanc of the TestDrinkingBehaviour actor for each test!!!!
 @RunWith(classOf[JUnitRunner])
-class DrinkingBehaviourSpec extends TestKit(ActorSystem("AutoPilotSpec"))
+class DrinkingBehaviourSpec extends TestKit(ActorSystem("DrinkingBehaviourSpec"))
 							  with MustMatchers
 							  with ImplicitSender
 							  with WordSpec
 							  with BeforeAndAfterAll {
   import DrinkingBehaviour._
-  
+
+  def createDrikingBehaviourActor() = TestActorRef[TestDrinkingBehaviour](Props(classOf[TestDrinkingBehaviour], testActor))
   override def afterAll(): Unit = system.shutdown()
-  
+
   "DrinkingBehaviour actor" should {
     "start drinking right after being created" in {
-    	val behaviour = TestActorRef[TestDrinkingBehaviour](Props(classOf[TestDrinkingBehaviour], testActor))
-    			
-    	expectMsg(FeelingSober)
-    	assert(behaviour.underlyingActor.currentBloodAlcoholLevel > 0)
+      val behaviour = createDrikingBehaviourActor
+
+      expectMsg(FeelingSober)
+    }
+
+    "maintain blood alcohol level should not be negative while FeelingSober" in {
+      val behaviour = createDrikingBehaviourActor
+
+      expectMsg(FeelingSober)
+      assert(behaviour.underlyingActor.currentBloodAlcoholLevel >= 0.0f)
+    }
+
+    "maintain blood alcohol level bellow limit while FeelingSober" in {
+      val behaviour = createDrikingBehaviourActor
+
+      expectMsg(FeelingSober)
+      assert(behaviour.underlyingActor.currentBloodAlcoholLevel <= SoberBloodAlcoholLimit)
+    }
+
+    "go from FeelingSober to FeelingTipsy" in {
+      val behaviour = createDrikingBehaviourActor
+      expectMsg(FeelingSober)
+
+      fishForMessage(5 seconds, "Waiting to get tipsy") {
+        case FeelingTipsy =>
+          behaviour.underlyingActor.currentBloodAlcoholLevel > SoberBloodAlcoholLimit
+        case _ => false
+      }
+    }
+
+    "go from FeelingTipsy to FeelingLikeZaphod" in {
+      val behaviour = createDrikingBehaviourActor
+
+      fishForMessage(5 seconds, "Waiting to get tipsy") {
+        case FeelingLikeZaphod =>
+          behaviour.underlyingActor.currentBloodAlcoholLevel > TipsyBloodAlcoholLimit
+        case _ => false
+      }
     }
     
-    "go from FeelingSober to FeelingTipsy" in {
-    	val behaviour = TestActorRef[TestDrinkingBehaviour](Props(classOf[TestDrinkingBehaviour], testActor))
-    			
-    	expectMsg(FeelingSober)
-
-    	fishForMessage(20 seconds, "We did not reach the tipsy state in 5 seconds"){
-    	  case FeelingTipsy =>
-    	  	behaviour.underlyingActor.currentBloodAlcoholLevel > SoberBloodAlcoholLimit
-    	}
-    }
   }
 }
 

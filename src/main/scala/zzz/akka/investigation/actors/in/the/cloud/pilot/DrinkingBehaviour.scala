@@ -20,9 +20,11 @@ object DrinkingBehaviour {
   case object FeelingLikeZaphod
 
   class DrinkingBehaviourWithResolution(drinker: ActorRef) extends DrinkingBehaviour(drinker) with DrinkingResolution
-  
+
   val SoberBloodAlcoholLimit = 0.01
   val TipsyBloodAlcoholLimit = 0.03
+  val SoberingBloodAlcoholLevelDecrease = -0.0001f
+  val AlcoholBloodLevelIncreasePerDrinkInterval = 0.005f
 }
 
 class DrinkingBehaviour(drinker: ActorRef) extends Actor {
@@ -31,24 +33,22 @@ class DrinkingBehaviour(drinker: ActorRef) extends Actor {
   import DrinkingBehaviour._
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  val SoberingBloodAlcoholLevelDecrease = -0.0001f
-
   var currentBloodAlcoholLevel = 0f
   def scheduler = context.system.scheduler
+
+  override def preStart(): Unit = drink()
+  private def drink() = scheduler.scheduleOnce(drinkInterval(), self, BloodAlcoholLevelChanged(AlcoholBloodLevelIncreasePerDrinkInterval))
 
   override def postStop(): Unit = sobering.cancel()
   val sobering = scheduler.schedule(initialSobering, soberingInterval, self, BloodAlcoholLevelChanged(SoberingBloodAlcoholLevelDecrease))
 
-  override def preStart(): Unit = drink()
-  def drink() = scheduler.scheduleOnce(drinkInterval(), self, BloodAlcoholLevelChanged(0.005f))
-
   def receive = {
     case BloodAlcoholLevelChanged(amount) =>
       currentBloodAlcoholLevel = (currentBloodAlcoholLevel + amount).max(0f)
-      drinker ! drinkAndGetFeeling()
+      drinker ! getStateAfterDrinking()
   }
 
-  def drinkAndGetFeeling() = {
+  def getStateAfterDrinking() = {
     if (currentBloodAlcoholLevel <= SoberBloodAlcoholLimit) {
       drink()
       FeelingSober
