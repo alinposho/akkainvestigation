@@ -32,7 +32,7 @@ class DrinkingBehaviourSpec extends TestKit(ActorSystem("DrinkingBehaviourSpec")
       expectMsg(FeelingSober)
     }
 
-    "maintain blood alcohol level should not be negative while FeelingSober" in {
+    "maintain blood alcohol level zero or positive while FeelingSober" in {
       val behaviour = createDrikingBehaviourActor
 
       expectMsg(FeelingSober)
