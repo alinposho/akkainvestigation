@@ -11,6 +11,9 @@ import akka.actor.actorRef2Scala
 case class SomeMessage(msg: String)
 case class DelayedResponse(msg: String)
 
+/*
+ * This is a clear example of an erroneous use of the "sender" field from an actor.
+ */
 class DoNotDoActor extends Actor with ActorLogging {
 
   def receive = {
