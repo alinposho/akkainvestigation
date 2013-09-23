@@ -35,7 +35,7 @@ class ControlSurfacesSpec extends TestKit(ActorSystem("ControlSurfacesSpec"))
 
   "ControlSurfaces" should {
 
-    "send commads to the altimeter when commig from the controller" in {
+    "send commads to the altimeter when comming from the controller" in {
       val altimeter = testActor
       val controlSurfaces = createControlSurfacesForAltimeter(altimeter)
 
@@ -54,7 +54,7 @@ class ControlSurfacesSpec extends TestKit(ActorSystem("ControlSurfacesSpec"))
       controlSurfaces
     }
 
-    "send commads to the heading indicator when commig from the controller" in {
+    "send commads to the heading indicator when comming from the controller" in {
       val heading = testActor
       val controlSurfaces = createControlSurfacesForHeading(heading)
 

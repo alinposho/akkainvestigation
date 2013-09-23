@@ -28,8 +28,8 @@ object FlightAttendant {
   val MagicHealingPoltion = "Magic Healing Potion"
 
   class DefaultFlightAttendant extends FlightAttendant with AttendantResponsiveness {
-    val FIVE_MINUTES = 300000
-    override val maxResponseTimeMS = FIVE_MINUTES
+    val FiveMinutes = 300000
+    override val maxResponseTimeMS = FiveMinutes
   }
 
   def apply(): Props = Props[DefaultFlightAttendant]

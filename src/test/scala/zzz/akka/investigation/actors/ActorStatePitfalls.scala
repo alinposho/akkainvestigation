@@ -21,7 +21,7 @@ class ActorStatePitfallsSpec extends TestKit(ActorSystem("ActorStatePitfalls"))
   override def afterAll() = system.shutdown()
   
   "ActorStatePitfalls" should {
-    "not raise an exception since the code is not reachable" in {
+    "not raise an exception since the code is unreachable" in {
       val actorRef = TestActorRef[ActorStatePitfalls]
       
       actorRef ! RaiseException
