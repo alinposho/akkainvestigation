@@ -22,10 +22,10 @@ object Supervisor {
 class Supervisor() extends Actor {
 
   override val supervisorStrategy = OneForOneStrategy(maxNrOfRetries = MaxNrOfRetries, withinTimeRange = 1 minute) {
-    case _: ArithmeticException ⇒ Resume
-    case _: NullPointerException ⇒ Restart
-    case _: IllegalArgumentException ⇒ Stop
-    case _: Exception ⇒ Escalate
+    case _: ArithmeticException => Resume
+    case _: NullPointerException => Restart
+    case _: IllegalArgumentException => Stop
+    case _: Exception => Escalate
   }
 
   def receive = {
@@ -169,7 +169,7 @@ class ActorSupervisionSpec extends TestKit(ActorSystem("ActorSpec"))
 
       crashWithException(child)
       expectMsgPF() {
-        case t @ Terminated(child) if t.existenceConfirmed ⇒ ()
+        case t @ Terminated(child) if t.existenceConfirmed => ()
       }
     }
 
