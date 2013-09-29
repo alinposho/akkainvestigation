@@ -32,6 +32,7 @@ object FlyingBehaviour {
   case class Fly(target: CourseTarget)
 
   def currentMS = System.currentTimeMillis()
+  
   def calcElevatorChange(target: CourseTarget, status: CourseStatus): Any = {
     val alt = (target.altitude - status.altitude).toFloat
     val dur = target.byMillis - status.altitudeSinceMS
