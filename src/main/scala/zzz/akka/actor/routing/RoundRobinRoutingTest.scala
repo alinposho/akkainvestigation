@@ -33,6 +33,6 @@ object RoundRobinRoutingTest {
 
 class DBConnection extends Actor with ActorLogging {
   override def receive = {
-    case _ => log.info(s"Actor ${self} received a new DB connection request")
+    case _ => log.info(s"${self} received a new DB connection request")
   }
 }
