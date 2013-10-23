@@ -55,8 +55,10 @@ object FlyingBehaviour {
 
 class FlyingBehaviour(plane: ActorRef,
                       heading: ActorRef,
-                      altimeter: ActorRef) extends Actor
-                      					   with FSM[FlyingBehaviour.State, FlyingBehaviour.Data] {
+                      altimeter: ActorRef)
+  extends Actor
+  with FSM[FlyingBehaviour.State, FlyingBehaviour.Data] {
+  
   import FSM._
   import FlyingBehaviour._
   import Pilots._
@@ -137,7 +139,7 @@ class FlyingBehaviour(plane: ActorRef,
 
   onTransition {
     case PreparingToFly -> Flying =>
-      setTimer("Adjustment", Adjust, 200 milliseconds, repeat = true)
+      setTimer(name = "Adjustment", msg = Adjust, timeout = 200 milliseconds, repeat = true)
   }
 
   onTransition {
@@ -151,5 +153,6 @@ class FlyingBehaviour(plane: ActorRef,
       goto(Idle)
   }
 
+  // This should be the last call in the constructor as the method scaladoc states.
   initialize
 }
