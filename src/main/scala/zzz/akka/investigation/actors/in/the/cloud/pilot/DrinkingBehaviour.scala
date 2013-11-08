@@ -1,7 +1,22 @@
 package zzz.akka.investigation.actors.in.the.cloud.pilot
 
-import akka.actor.ActorRef
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.DurationInt
+import scala.concurrent.duration.FiniteDuration
+import scala.util.Random
+import DrinkingBehaviour.AlcoholBloodLevelIncreasePerDrinkInterval
+import DrinkingBehaviour.SoberBloodAlcoholLimit
+import DrinkingBehaviour.SoberingBloodAlcoholLevelDecrease
+import DrinkingBehaviour.TipsyBloodAlcoholLimit
 import akka.actor.Actor
+import akka.actor.ActorRef
+import akka.actor.actorRef2Scala
+import akka.actor.Props
+
+trait DrinkingProvider {
+  import DrinkingBehaviour._
+  def newDrinkingBehaviour(drinker: ActorRef) = Props(classOf[DrinkingBehaviourWithResolution], drinker)
+}
 
 trait DrinkingResolution {
   import scala.util.Random

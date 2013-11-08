@@ -3,9 +3,15 @@ package zzz.akka.investigation.actors.in.the.cloud
 import akka.actor.ActorRef
 import akka.actor.Actor
 import akka.actor.FSM
-import zzz.akka.investigation.actors.in.the.cloud.pilot.Pilots
+import zzz.akka.investigation.actors.in.the.cloud.pilot.Pilot
 import zzz.akka.investigation.actors.in.the.cloud.altimeter.Altimeter
 import zzz.akka.investigation.actors.in.the.cloud.heading.HeadingIndicator
+import akka.actor.Props
+
+trait FlyingProvider {
+  def newFlyingBehaviour(plane: ActorRef, heading: ActorRef, altimeter: ActorRef) = 
+    Props(classOf[FlyingBehaviour], plane, heading, altimeter)
+}
 
 object FlyingBehaviour {
   import ControlSurfaces._
@@ -56,12 +62,11 @@ object FlyingBehaviour {
 class FlyingBehaviour(plane: ActorRef,
                       heading: ActorRef,
                       altimeter: ActorRef)
-  extends Actor
-  with FSM[FlyingBehaviour.State, FlyingBehaviour.Data] {
+  extends Actor with FSM[FlyingBehaviour.State, FlyingBehaviour.Data] {
   
   import FSM._
   import FlyingBehaviour._
-  import Pilots._
+  import Pilot._
   import Plane._
   import Altimeter._
   import HeadingIndicator._
