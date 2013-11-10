@@ -71,6 +71,26 @@ class BuncherSpec extends TestKit(ActorSystem("Buncher"))
           assert(fsm.stateData === Todo(testActor, Vector.empty))
       }
     }
+
+    "add the element in the queue when Idle with Todo state data" in {
+      runTestThatAddsElementInTheQueueForState(Idle)
+    }
+
+    "add the element in the queue when Active with Todo state data" in {
+      runTestThatAddsElementInTheQueueForState(Active)
+    }
+
+    def runTestThatAddsElementInTheQueueForState(initialState: State): Unit = {
+      val fsm = TestFSMRef(new Buncher)
+      fsm.setState(stateName = initialState, stateData = Todo(testActor, Vector.empty))
+
+      val smth = "smth"
+      fsm ! Queue(smth)
+
+      assert(fsm.stateName === Active)
+      assert(fsm.stateData === Todo(testActor, Vector(smth)))
+    }
+
   }
 
 }
