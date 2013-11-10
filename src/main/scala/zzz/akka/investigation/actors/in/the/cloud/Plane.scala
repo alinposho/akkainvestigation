@@ -8,7 +8,6 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import zzz.akka.investigation.actors.in.the.cloud.pilot.CoPilot
 import zzz.akka.investigation.actors.in.the.cloud.pilot.Pilot
-import zzz.akka.investigation.actors.in.the.cloud.pilot.Pilots
 import zzz.akka.investigation.actors.in.the.cloud.pilot.AutoPilot
 import zzz.akka.investigation.actors.in.the.cloud.pilot.PilotProvider
 import zzz.akka.investigation.actors.in.the.cloud.supervisor.IsolatedStopSupervisor
@@ -74,7 +73,7 @@ class Plane extends Actor with ActorLogging {
   import Plane._
   import EventSource.RegisterListener
   import IsolatedLifeCycleSupervisor.WaitForStart
-  import Pilots._
+  import Pilot._
 
   implicit val timeout = Timeout(5.seconds)
 
@@ -105,7 +104,7 @@ class Plane extends Actor with ActorLogging {
   private def startPeople() {
     val plane: ActorRef = self
     val controls = actorForControls(ControlSurfaces.Name)
-    val autopilot = actorForControls(Pilots.AutoPilotName)
+    val autopilot = actorForControls(Pilot.AutoPilotName)
     val altimeter = actorForControls(Altimeter.Name)
 
     val people = context.actorOf(Props(classOf[StopSupervisor], plane, controls,

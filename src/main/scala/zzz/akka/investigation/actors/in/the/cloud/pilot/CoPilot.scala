@@ -2,7 +2,7 @@ package zzz.akka.investigation.actors.in.the.cloud.pilot
 
 import akka.actor.Actor
 import akka.actor.ActorRef
-import Pilots._
+import Pilot._
 import akka.dispatch.sysmsg.Terminate
 import akka.actor.Terminated
 import zzz.akka.investigation.actors.in.the.cloud.Plane.GiveMeControl

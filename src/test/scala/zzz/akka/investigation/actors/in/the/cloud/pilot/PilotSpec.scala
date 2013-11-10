@@ -38,7 +38,7 @@ class PilotSpec extends TestKit(ActorSystem("PilotSpecActorSystem"))
   with BeforeAndAfterAll
   with BeforeAndAfterEach {
 
-  import Pilots._
+  import Pilot._
   import Plane._
 
   private var pilot: TestActorRef[Pilot] = null

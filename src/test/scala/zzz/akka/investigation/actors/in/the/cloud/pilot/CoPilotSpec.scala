@@ -43,7 +43,7 @@ class CoPilotSpec extends TestKit(ActorSystem("CopilotSpec", ConfigFactory.parse
   def pilotsReadyToGo(): ActorRef = {
     val supervisor = system.actorOf(Props(classOf[PilotsSupervisor], testActor), TestPilotsSupervisorName)
     waitForSupervisorAndChildrenSetUp(supervisor)
-    system.actorFor(copilotPath) ! Pilots.ReadyToGo
+    system.actorFor(copilotPath) ! Pilot.ReadyToGo
 
     supervisor
   }

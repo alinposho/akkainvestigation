@@ -56,8 +56,8 @@ object Pilot {
   val AutoPilotName = "AutoPilot"
 }
 
-class Pilot(plane: ActorRef,
-            autopilot: ActorRef,
+class Pilot(var plane: ActorRef,
+            cautopilot: ActorRef,
             heading: ActorRef,
             altimeter: ActorRef) extends Actor {
   this: DrinkingProvider with FlyingProvider =>
@@ -70,8 +70,9 @@ class Pilot(plane: ActorRef,
   import DrinkingBehaviour._
   import FlyingBehaviour._
   import FSM._
-  val copilotName = context.system.settings.config.getString(
-    "zzz.akka.avionics.flightcrew.copilotName")
+  val copilotName = context.system.settings.config.getString("zzz.akka.avionics.flightcrew.copilotName")
+  var copilot: ActorRef = _
+  
   override def preStart() {
     actorOf(newDrinkingBehaviour(self), "DrinkingBehaviour")
     actorOf(newFlyingBehaviour(plane, heading, altimeter), "FlyingBehaviour")
@@ -81,7 +82,7 @@ class Pilot(plane: ActorRef,
   // in having it around for long
   def bootstrap: Receive = {
     case ReadyToGo =>
-      val copilot = actorFor("../" + copilotName)
+      copilot = actorFor("../" + copilotName)
       val flyer = actorFor("FlyingBehaviour")
       flyer ! SubscribeTransitionCallBack(self)
       flyer ! Fly(CourseTarget(20000, 250, System.currentTimeMillis + 30000))
@@ -123,22 +124,22 @@ class Pilot(plane: ActorRef,
   // Updates the FlyingBehaviour with sober calculations and then
   // becomes the sober behaviour
   def becomeSober(copilot: ActorRef, flyer: ActorRef) = {
-    flyer ! NewElevatorCalculator(calcElevator)
-    flyer ! NewBankCalculator(calcAilerons)
+//    flyer ! NewElevatorCalculator(calcElevator)
+//    flyer ! NewBankCalculator(calcAilerons)
     become(sober(copilot, flyer))
   }
   // Updates the FlyingBehaviour with tipsy calculations and then
   // becomes the tipsy behaviour
   def becomeTipsy(copilot: ActorRef, flyer: ActorRef) = {
-    flyer ! NewElevatorCalculator(tipsyCalcElevator)
-    flyer ! NewBankCalculator(tipsyCalcAilerons)
+//    flyer ! NewElevatorCalculator(tipsyCalcElevator)
+//    flyer ! NewBankCalculator(tipsyCalcAilerons)
     become(tipsy(copilot, flyer))
   }
   // Updates the FlyingBehaviour with zaphod calculations and then
   // becomes the zaphod behaviour
   def becomeZaphod(copilot: ActorRef, flyer: ActorRef) = {
-    flyer ! NewElevatorCalculator(zaphodCalcElevator)
-    flyer ! NewBankCalculator(zaphodCalcAilerons)
+//    flyer ! NewElevatorCalculator(zaphodCalcElevator)
+//    flyer ! NewBankCalculator(zaphodCalcAilerons)
     become(zaphod(copilot, flyer))
   }
   // At any time, the FlyingBehaviour could go back to an Idle state,

@@ -1,7 +1,7 @@
 package zzz.akka.investigation.actors.in.the.cloud.pilot
 
 import akka.actor.Actor
-import Pilots.ReadyToGo
+import Pilot.ReadyToGo
 import zzz.akka.investigation.actors.in.the.cloud.Plane.{ GiveMeControl, GetPerson, PersonReference }
 import akka.actor.ActorRef
 import akka.actor.Terminated

@@ -12,7 +12,7 @@ import com.typesafe.config.ConfigFactory
 import akka.actor.Actor
 import akka.actor.Props
 import PilotsSpecConfig._
-import Pilots._
+import Pilot._
 import zzz.akka.investigation.actors.in.the.cloud.Plane.{ GiveMeControl, GetPerson, PersonReference }
 import akka.actor.ActorRef
 import scala.concurrent.duration._
