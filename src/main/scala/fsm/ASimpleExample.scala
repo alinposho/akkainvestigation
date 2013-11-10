@@ -43,6 +43,7 @@ class Buncher extends Actor with FSM[State, Data] {
       goto(Idle) using t.copy(queue = Vector.empty)
   }
 
+  // This handler is not stacked, i.e. subsequent calls to whenUnhandled with remove the previous ones
   whenUnhandled {
     case Event(Queue(obj), t @ Todo(_, vector)) =>
       goto(Active) using t.copy(queue = vector :+ obj)
