@@ -38,7 +38,7 @@ class Buncher extends Actor with FSM[State, Data] {
       stay using Todo(ref, Vector.empty)
   }
   
-  when(Active) {
+  when(Active, stateTimeout = 1 second) {
     case Event(Flush | StateTimeout, t: Todo) => 
       goto(Idle) using t.copy(queue = Vector.empty)
   }
@@ -49,3 +49,4 @@ class Buncher extends Actor with FSM[State, Data] {
 object ASimpleExample {
 
 }
+
