@@ -9,7 +9,7 @@ import org.scalatest.junit.JUnitRunner
 import scala.concurrent.duration._
 
 @RunWith(classOf[JUnitRunner])
-class UnbecomeTooManyTimes extends TestKit(ActorSystem("ActorStatePitfalls"))
+class UnbecomeTooManyTimes extends TestKit(ActorSystem("UnbecomeTooManyTimes"))
   with WordSpec
   with ImplicitSender
   with MustMatchers
