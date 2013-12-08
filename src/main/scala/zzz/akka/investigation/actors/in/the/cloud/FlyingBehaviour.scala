@@ -159,5 +159,5 @@ class FlyingBehaviour(plane: ActorRef,
   }
 
   // This should be the last call in the constructor as the method scaladoc states.
-  initialize
+  initialize()
 }
