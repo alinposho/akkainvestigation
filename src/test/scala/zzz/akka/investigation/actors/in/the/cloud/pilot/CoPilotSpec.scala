@@ -1,21 +1,22 @@
 package zzz.akka.investigation.actors.in.the.cloud.pilot
 
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import akka.testkit.TestKit
-import akka.actor.ActorSystem
-import akka.testkit.ImplicitSender
-import org.scalatest.matchers.MustMatchers
-import org.scalatest._
-import akka.actor._
-import PilotsSpecConfig._
-import zzz.akka.investigation.actors.in.the.cloud.supervisor._
+import akka.actor.{ Actor, ActorRef, ActorSystem, PoisonPill, Props }
+import akka.pattern.ask
+import akka.testkit.{ ImplicitSender, TestKit, TestActorRef }
 import akka.util.Timeout
+import com.typesafe.config.ConfigFactory
+import org.junit.runner.RunWith
+import org.scalatest.matchers.MustMatchers
+import org.scalatest.{ BeforeAndAfterAll, WordSpec }
+import org.scalatest.junit.JUnitRunner
 import scala.concurrent.duration._
 import scala.concurrent.Await
-import akka.pattern.ask
+
+import PilotsSpecConfig._
+import zzz.akka.investigation.actors.in.the.cloud.supervisor._
 import zzz.akka.investigation.actors.in.the.cloud.Plane._
-import com.typesafe.config.ConfigFactory
+
+
 
 @RunWith(classOf[JUnitRunner])
 class CoPilotSpec extends TestKit(ActorSystem("CopilotSpec", ConfigFactory.parseString(PilotsSpecConfig.configStr))) 
@@ -24,6 +25,7 @@ class CoPilotSpec extends TestKit(ActorSystem("CopilotSpec", ConfigFactory.parse
 					with WordSpec 
 					with BeforeAndAfterAll {
 
+  
   val pilotPath = s"/user/TestPilots/$pilotName"
   val copilotPath = s"/user/TestPilots/$copilotName"
   val TestPilotsSupervisorName = "TestPilots"

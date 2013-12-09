@@ -5,8 +5,8 @@ import akka.testkit.{ ImplicitSender, TestKit, TestActorRef }
 import org.junit.runner.RunWith
 import org.scalatest.matchers.MustMatchers
 import org.scalatest.{ BeforeAndAfterAll, WordSpec }
-import scala.concurrent.duration._
 import org.scalatest.junit.JUnitRunner
+import scala.concurrent.duration._
 
 @RunWith(classOf[JUnitRunner])
 class KillingTheParentActorSpec extends TestKit(ActorSystem("KillingTheParentActor"))
