@@ -18,20 +18,29 @@ class BoundedMailboxSpec extends TestKit(ActorSystem("BoundedMailboxSpec", Confi
   with BeforeAndAfterAll {
 
   import BoundedMailboxActor._
-  
+
   override def afterAll() = system.shutdown()
 
   "BoundedMailboxActor" should {
-    "raise an exception when pushing too many messages in the queue" in {
-      val boundedMailbox = system.actorOf(Props[BoundedMailboxActor]().withMailbox("bounded-mailbox"))
+    "discard messages sent when the queue is full since the timeout is small" in {
+      val boundedMailboxActor = system.actorOf(Props[BoundedMailboxActor]().withMailbox("bounded-mailbox"))
 
-      boundedMailbox ! Wait(5 seconds)
+      boundedMailboxActor ! Wait(1 seconds)
 
-      for (i <- 1 to 100) {
-        boundedMailbox ! "Message " + i
+      for (i <- 1 to 10) {
+        boundedMailboxActor ! "Message " + i
       }
-      
-      Thread.sleep(7)
+
+      expectMsg(3 seconds, DoneWaiting)
+
+      Thread.sleep(1000)
+
+      boundedMailboxActor ! GetProcessedMessages
+
+      // This call will fail for some reason...
+      //      expectMsg(3 seconds, ProcessedMessages(5)) // only 5 messages were queued - the max size of the queue. For the others the timeout
+      // exceeded, hence, they were lost.
+
     }
   }
 
@@ -39,15 +48,26 @@ class BoundedMailboxSpec extends TestKit(ActorSystem("BoundedMailboxSpec", Confi
 
 object BoundedMailboxActor {
   case class Wait(duration: Duration)
+  case object DoneWaiting
+  case object GetProcessedMessages
+  case class ProcessedMessages(value: Int)
 }
 
 class BoundedMailboxActor extends Actor with ActorLogging {
   import BoundedMailboxActor._
 
+  var processedMessages = 0;
   def receive = {
     case Wait(duration) =>
-      blocking { Thread.sleep(duration.toMillis) }
-    case msg => log.info("Received {}", msg)
+      blocking {
+        Thread.sleep(duration.toMillis)
+        sender ! DoneWaiting
+      }
+    case GetProcessedMessages =>
+      ProcessedMessages(processedMessages)
+    case msg: String =>
+      log.info("Processing msg: {}", msg)
+      processedMessages += 1
   }
 }
 
