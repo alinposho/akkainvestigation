@@ -1,14 +1,10 @@
 package zzz.akka.actor.routing
 
 import com.typesafe.config.ConfigFactory
-import akka.actor.Actor
-import akka.actor.ActorLogging
-import akka.actor.ActorSystem
-import akka.actor.Props
-import akka.actor.actorRef2Scala
+import akka.actor._
 import akka.routing.FromConfig
 import scala.concurrent.duration._
-import akka.actor.ActorRef
+import scala.language.postfixOps
 import scala.util.Random
 
 object DifferentRoutingStrategies {
