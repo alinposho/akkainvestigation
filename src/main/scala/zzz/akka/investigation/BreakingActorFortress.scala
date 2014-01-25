@@ -1,12 +1,11 @@
 package zzz.akka.investigation
-import akka.actor.Actor
-import scala.concurrent.duration._
-import akka.actor.ActorLogging
-import scala.concurrent.ExecutionContext.Implicits.global
-import akka.actor.ActorSystem
-import akka.actor.Props
+
+import akka.actor._
 import akka.util.Timeout
-import akka.actor.actorRef2Scala
+
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.postfixOps
 
 case class SomeMessage(msg: String)
 case class DelayedResponse(msg: String)

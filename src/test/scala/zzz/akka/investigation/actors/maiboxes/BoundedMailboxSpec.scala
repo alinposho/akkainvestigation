@@ -8,6 +8,7 @@ import org.scalatest.matchers.MustMatchers
 import org.scalatest.{ BeforeAndAfterAll, WordSpec }
 import org.scalatest.junit.JUnitRunner
 import scala.concurrent.duration._
+import scala.language.postfixOps
 import scala.concurrent._
 
 @RunWith(classOf[JUnitRunner])
