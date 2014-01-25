@@ -7,19 +7,17 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 
-
 object CreatingAgents {
   
   def main(args: Array[String]): Unit = {
-    implicit val system = ActorSystem("CreatingAgents")
     
     val agent = Agent(5)
-    
     println("Agent value is: " + agent.get)
     
-    system.scheduler.scheduleOnce(5 seconds){
-      system.shutdown()
-    }
+    val execContext = global
+    val agentWithExplicitExecContext = Agent("Explicit execution context")(execContext)
+    println("Agent with explicit execution context value: " + agentWithExplicitExecContext.get)
+    
   }
 
 }
