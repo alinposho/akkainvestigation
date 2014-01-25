@@ -54,9 +54,30 @@ class AgentInvestigationTest extends TestKit(ActorSystem("AgentInvestigationTest
       val future = agent.future
       agent send 19
 
-      assert(agent.get != firstUpdate)
       assert(Await.result(future, 3 seconds) === firstUpdate) // Did we get the last update or not?
     }
+
+    "accept functions that modify their internal behaviour" in {
+      val agent = Agent(5)
+
+      agent send (x =>
+        //do something interesting with the Agents current value
+        x + 1)
+
+      assert(Await.result(agent.future, 3 seconds) === 6) // The result of executing the function
+    }
+
+    "execute operations sent using sendOff in another execution context" in {
+      val agent = Agent("Blah")
+
+      agent send "1234"
+
+      agent sendOff { x =>
+        x toCharArray () mkString ("/")
+      }
+
+      assert(Await.result(agent.future, 3 seconds) === "1/2/3/4") // The result of executing the function
+    }
   }
-  
+
 }
