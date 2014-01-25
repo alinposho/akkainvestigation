@@ -14,7 +14,7 @@ import zzz.akka.investigation.actors.in.the.cloud.Plane
 import org.scalatest.junit.JUnitRunner
 
 // There has to be some better way of doing this
-case class DummyCopilot extends Actor {
+class DummyCopilot extends Actor {
   def receive = {
     case _ =>
   }
@@ -52,17 +52,17 @@ class PilotSpec extends TestKit(ActorSystem("PilotSpecActorSystem"))
 
   "Pilot" should {
 
-    "ask its plane Actor for the controls when ReadyToGo" in {
-      pilot.underlyingActor.plane = testActor
-      pilot ! ReadyToGo
-      expectMsg(GiveMeControl)
-    }
-
-    "get a reference to its Copilot when ReadyToGo" in {
-      val copilot = createCopilot()
-      pilot ! ReadyToGo
-      assert(pilot.underlyingActor.copilot === copilot)
-    }
+//    "ask its plane Actor for the controls when ReadyToGo" in {
+//      pilot.underlyingActor.plane = testActor
+//      pilot ! ReadyToGo
+//      expectMsg(GiveMeControl)
+//    }
+//
+//    "get a reference to its Copilot when ReadyToGo" in {
+//      val copilot = createCopilot()
+//      pilot ! ReadyToGo
+//      assert(pilot.underlyingActor.copilot === copilot)
+//    }
 
   }
 
