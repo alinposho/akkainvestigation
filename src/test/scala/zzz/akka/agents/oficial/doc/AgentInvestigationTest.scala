@@ -7,7 +7,6 @@ import org.junit.runner.RunWith
 import org.scalatest.matchers.MustMatchers
 import org.scalatest.{ BeforeAndAfterAll, WordSpec }
 import org.scalatest.junit.JUnitRunner
-
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -77,6 +76,36 @@ class AgentInvestigationTest extends TestKit(ActorSystem("AgentInvestigationTest
       }
 
       assert(Await.result(agent.future, 3 seconds) === "1/2/3/4") // The result of executing the function
+    }
+
+    "maintain execution order for send and sendOff sent from the same thread" in {
+      val secretAgent = Agent(7)
+
+      secretAgent sendOff { i => Thread.sleep(200); 5 } // This will not block the current thread
+      secretAgent send { 10 } // And this will execute only after sendOff finishes
+
+      Await.result(secretAgent.future, 3 seconds) must be(10)
+    }
+
+    "return a future when calling alter" in {
+      val secretAgent = Agent(7)
+
+      val f1 = secretAgent.alter({ i => i + 1 }) // No need to provide a timeout as it was the case in previous versions of akka
+      val f2 = secretAgent.alter({ i => i + 1 })
+
+      Await.result(f2, 1.second) must be(9)
+      Await.result(f1, 1.second) must be(8)
+    }
+
+    "not block the current thread of execution when calling alterOff" in {
+      val secretAgent = Agent(7)
+
+      val f1 = secretAgent.alterOff({ i =>
+        Thread.sleep(200)
+        i + 1
+      }) // This will execute on its own thread separate from the pool
+
+      Await.result(f1, 3.seconds) must be(8)
     }
   }
 
