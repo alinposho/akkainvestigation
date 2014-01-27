@@ -66,7 +66,7 @@ class BuncherSpec extends TestKit(ActorSystem("Buncher"))
 
       // Verify
       expectMsg(CurrentState(fsm, Active))
-      expectMsgPF(3 seconds) {
+      expectMsgPF(3.seconds) {
         case Transition(sender, Active, Idle) =>
           assert(sender === fsm)
           assert(fsm.stateName === Idle)
