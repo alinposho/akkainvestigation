@@ -14,7 +14,7 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 @RunWith(classOf[JUnitRunner])
-class BathroomSpec extends TestKit(ActorSystem("BathroomFSMTest"))
+class BathroomtSpec extends TestKit(ActorSystem("BathroomFSMTest"))
   with WordSpec
   with ImplicitSender
   with MustMatchers
@@ -80,7 +80,7 @@ class BathroomSpec extends TestKit(ActorSystem("BathroomFSMTest"))
   private def assertStateDataIs(by: ActorRef, queue: Queue[ActorRef], state: Data): Unit = {
     state match {
       case InUse(by, atTime, stateQueue) => {
-        assert(by === testActor)
+        assert(by === testActor, s"Stats should have been sent by the ")
         assert(queue === stateQueue, s"The queue should be queue")
       }
       case NotInUse => throw new AssertionError("The state data should be InUse")
@@ -95,6 +95,7 @@ class BathroomSpec extends TestKit(ActorSystem("BathroomFSMTest"))
     }
 
     for (probe <- probes) {
+      blocking { Thread.sleep(10) }
       probe send (bathroom, Finished(occupantGender))
     }
   }
@@ -102,9 +103,9 @@ class BathroomSpec extends TestKit(ActorSystem("BathroomFSMTest"))
   private def assertStatsAre(gender: Gender, count: Int, agent: Agent[GenderAndTime]): Unit = {
     Await.result(agent.future, 3 seconds) match {
       case GenderAndTime(agentGender, peakDuration, numberOfToiletUses) => {
-    	  assert(agentGender === gender)
-    	  assert(count === numberOfToiletUses)
-    	  assert(peakDuration > 0.seconds)
+        assert(agentGender === gender)
+        assert(count === numberOfToiletUses)
+        assert(peakDuration > 0.millis)
       }
     }
   }
